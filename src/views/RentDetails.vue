@@ -4,6 +4,27 @@
       <el-icon class="header-icon"><Document /></el-icon>
       <span>预约单详情</span>
     </div>
+
+    <el-dialog v-model="exportDialogVisible" title="导出Excel" width="400px">
+      <el-form label-width="80px">
+        <el-form-item label="时间范围">
+          <el-date-picker
+            v-model="exportDateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            style="width: 100%"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="exportDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmExport">导出</el-button>
+      </template>
+    </el-dialog>
     
     <div class="search-bar">
       <el-input
@@ -45,6 +66,10 @@
       <el-button @click="handleReset">
         <el-icon><RefreshRight /></el-icon>
         重置
+      </el-button>
+      <el-button type="success" @click="handleExport" style="margin-left: 20px">
+        <el-icon><Download /></el-icon>
+        导出至Excel
       </el-button>
     </div>
     
@@ -167,11 +192,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Document, Search, RefreshRight } from '@element-plus/icons-vue'
+import { Document, Search, RefreshRight, Download } from '@element-plus/icons-vue'
 
 const loading = ref(false)
 const searchText = ref('')
 const statusFilter = ref('')
+const exportDialogVisible = ref(false)
+const exportDateRange = ref(null)
 
 const getToday = () => {
   const today = new Date()
@@ -315,6 +342,63 @@ const handleReset = () => {
   currentPage.value = 1
   pageSize.value = 10
   fetchData()
+}
+
+const handleExport = () => {
+  exportDateRange.value = null
+  exportDialogVisible.value = true
+}
+
+const confirmExport = async () => {
+  let url = '/api/rent-records/export'
+  const params = []
+  
+  if (exportDateRange.value && exportDateRange.value.length === 2) {
+    params.push(`startDate=${exportDateRange.value[0]}`)
+    params.push(`endDate=${exportDateRange.value[1]}`)
+  }
+  
+  if (params.length > 0) {
+    url += '?' + params.join('&')
+  }
+  
+  try {
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error('导出失败')
+    }
+    
+    const blob = await response.blob()
+    const downloadUrl = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    
+    const contentDisposition = response.headers.get('Content-Disposition')
+    let fileName = '预约记录.xlsx'
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename[*]?=.*?['"]?([^'"\r\n]+)['"]?/)
+      if (fileNameMatch && fileNameMatch.length > 1) {
+        let encodedFileName = fileNameMatch[1]
+        try {
+          fileName = decodeURIComponent(encodedFileName)
+        } catch (e) {
+          fileName = encodedFileName
+        }
+      }
+    }
+    
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(downloadUrl)
+    
+    exportDialogVisible.value = false
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('导出失败')
+  }
 }
 
 onMounted(() => {

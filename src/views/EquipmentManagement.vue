@@ -16,6 +16,36 @@
         <el-button type="primary" @click="saveAnnounce">保存</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="editDialogVisible" title="修改设备信息" width="500px">
+      <el-form :model="editDevice" label-width="80px">
+        <el-form-item label="设备名称">
+          <el-input v-model="editDevice.name" />
+        </el-form-item>
+        <el-form-item label="品牌">
+          <el-input v-model="editDevice.brand" />
+        </el-form-item>
+        <el-form-item label="类型">
+          <el-input v-model="editDevice.type" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="editDevice.status" style="width: 100%">
+            <el-option
+              v-for="item in statusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+              <span :style="{ color: item.color }">{{ item.label }}</span>
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleUpdate">保存</el-button>
+      </template>
+    </el-dialog>
     
     <el-card>
       <div class="add-device-form" v-if="isAuthenticated">
@@ -72,8 +102,9 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" v-if="isAuthenticated">
+        <el-table-column label="操作" width="180" v-if="isAuthenticated">
           <template #default="scope">
+            <el-button type="primary" size="small" @click="openEditDialog(scope.row)">修改</el-button>
             <el-popconfirm
               title="确定删除这个设备吗？"
               @confirm="handleDelete(scope.row)"
@@ -98,6 +129,14 @@ const deviceList = ref([])
 const loading = ref(false)
 const announceDialogVisible = ref(false)
 const announceContent = ref('')
+const editDialogVisible = ref(false)
+const editDevice = ref({
+  id: null,
+  name: '',
+  brand: '',
+  type: '',
+  status: 0
+})
 const newDevice = ref({
   name: '',
   brand: '',
@@ -198,6 +237,45 @@ const handleDelete = async (device) => {
   } catch (error) {
     console.error('删除失败:', error)
     ElMessage.error('删除失败')
+  }
+}
+
+const openEditDialog = (device) => {
+  editDevice.value = {
+    id: device.id,
+    name: device.name,
+    brand: device.brand,
+    type: device.type,
+    status: device.status
+  }
+  editDialogVisible.value = true
+}
+
+const handleUpdate = async () => {
+  if (!editDevice.value.name || !editDevice.value.brand || !editDevice.value.type) {
+    ElMessage.warning('请填写完整信息')
+    return
+  }
+  
+  try {
+    const response = await fetch(`/api/devices/${editDevice.value.id}/info`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(editDevice.value)
+    })
+    const data = await response.json()
+    if (data.success) {
+      ElMessage.success('更新成功')
+      editDialogVisible.value = false
+      fetchDevices()
+    } else {
+      ElMessage.error(data.message || '更新失败')
+    }
+  } catch (error) {
+    console.error('更新失败:', error)
+    ElMessage.error('更新失败')
   }
 }
 

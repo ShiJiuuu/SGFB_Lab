@@ -78,6 +78,29 @@ public class DeviceController {
         return ResponseEntity.ok(result);
     }
     
+    @PutMapping("/devices/{id}/info")
+    public ResponseEntity<Map<String, Object>> updateDeviceInfo(@PathVariable Integer id, @RequestBody Device deviceData) {
+        Device device = new Device();
+        device.setId(id);
+        device.setName(deviceData.getName());
+        device.setBrand(deviceData.getBrand());
+        device.setType(deviceData.getType());
+        device.setStatus(deviceData.getStatus());
+        
+        boolean success = deviceService.updateById(device);
+        
+        Map<String, Object> result = new HashMap<>();
+        if (success) {
+            result.put("success", true);
+            result.put("message", "更新成功");
+        } else {
+            result.put("success", false);
+            result.put("message", "更新失败");
+        }
+        
+        return ResponseEntity.ok(result);
+    }
+    
     @PostMapping("/devices")
     public ResponseEntity<Map<String, Object>> addDevice(@RequestBody Device device) {
         System.out.println("Received device: " + device.getName() + ", " + device.getBrand() + ", " + device.getType() + ", " + device.getStatus());
