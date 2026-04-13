@@ -44,8 +44,8 @@ public class DeviceController {
     @GetMapping("/devices/available")
     public ResponseEntity<Map<String, Object>> getAvailableDevicesByTypeAndTime(
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime borrowTime,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime returnTime) {
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime borrowTime,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime returnTime) {
         
         List<Device> devices = deviceService.getAvailableDevicesByTypeAndTime(type, borrowTime, returnTime);
         
