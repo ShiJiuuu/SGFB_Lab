@@ -77,7 +77,7 @@
               placeholder="选择预约时间"
               style="width: 100%"
               format="YYYY-MM-DD HH:mm"
-              value-format="YYYY-MM-DDTHH:mm:ss"
+              value-format="YYYY-MM-DD HH:mm"
               :disabled-date="disabledDate"
               :disabled-hours="disabledHours"
               :disabled-minutes="disabledMinutes"
@@ -92,7 +92,7 @@
               placeholder="选择归还时间"
               style="width: 100%"
               format="YYYY-MM-DD HH:mm"
-              value-format="YYYY-MM-DDTHH:mm:ss"
+              value-format="YYYY-MM-DD HH:mm"
             />
           </el-form-item>
         </el-col>
