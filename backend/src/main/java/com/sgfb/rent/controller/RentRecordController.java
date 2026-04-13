@@ -36,6 +36,7 @@ public class RentRecordController {
     public ResponseEntity<Map<String, Object>> getAllRentRecords(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+            @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         
@@ -47,6 +48,33 @@ public class RentRecordController {
         
         if (endDate != null) {
             wrapper.le(RentRecord::getBrwtime, LocalDateTime.of(endDate, LocalTime.MAX));
+        }
+        
+        if (status != null && !status.isEmpty()) {
+            if (status.contains(",")) {
+                String[] statuses = status.split(",");
+                List<Integer> statusList = new ArrayList<>();
+                for (String s : statuses) {
+                    if ("active".equals(s)) {
+                        statusList.add(0);
+                    } else if ("returned".equals(s)) {
+                        statusList.add(1);
+                    } else if ("overdue".equals(s)) {
+                        statusList.add(2);
+                    }
+                }
+                if (!statusList.isEmpty()) {
+                    wrapper.in(RentRecord::getStatus, statusList);
+                }
+            } else {
+                if ("active".equals(status)) {
+                    wrapper.eq(RentRecord::getStatus, 0);
+                } else if ("returned".equals(status)) {
+                    wrapper.eq(RentRecord::getStatus, 1);
+                } else if ("overdue".equals(status)) {
+                    wrapper.eq(RentRecord::getStatus, 2);
+                }
+            }
         }
         
         wrapper.orderByDesc(RentRecord::getBrwtime);
@@ -147,6 +175,25 @@ public class RentRecordController {
         } else {
             result.put("success", false);
             result.put("message", "状态更新失败");
+        }
+        
+        return ResponseEntity.ok(result);
+    }
+    
+    @PutMapping("/rent-records/{id}")
+    public ResponseEntity<Map<String, Object>> updateRentRecord(
+            @PathVariable String id,
+            @RequestBody RentRecord rentRecord) {
+        rentRecord.setId(id);
+        boolean success = rentRecordService.updateRentRecord(rentRecord);
+        
+        Map<String, Object> result = new HashMap<>();
+        if (success) {
+            result.put("success", true);
+            result.put("message", "订单更新成功");
+        } else {
+            result.put("success", false);
+            result.put("message", "订单更新失败");
         }
         
         return ResponseEntity.ok(result);

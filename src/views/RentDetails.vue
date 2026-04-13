@@ -25,6 +25,54 @@
         <el-button type="primary" @click="confirmExport">导出</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="editDialogVisible" title="修改订单" width="500px">
+      <el-form :model="editForm" label-width="100px">
+        <el-form-item label="姓名">
+          <el-input v-model="editForm.name" placeholder="请输入姓名" />
+        </el-form-item>
+        <el-form-item label="学号">
+          <el-input v-model="editForm.num" placeholder="请输入学号" />
+        </el-form-item>
+        <el-form-item label="手机号">
+          <el-input v-model="editForm.tel" placeholder="请输入手机号" />
+        </el-form-item>
+        <el-form-item label="预约时间">
+          <el-date-picker
+            v-model="editForm.brwtime"
+            type="datetime"
+            placeholder="选择预约时间"
+            style="width: 100%"
+            format="YYYY-MM-DD HH:mm"
+            value-format="YYYY-MM-DD HH:mm"
+          />
+        </el-form-item>
+        <el-form-item label="归还时间">
+          <el-date-picker
+            v-model="editForm.rtuntime"
+            type="datetime"
+            placeholder="选择归还时间"
+            style="width: 100%"
+            format="YYYY-MM-DD HH:mm"
+            value-format="YYYY-MM-DD HH:mm"
+          />
+        </el-form-item>
+        <el-form-item label="订单状态">
+          <el-select v-model="editForm.status" placeholder="请选择状态" style="width: 100%">
+            <el-option label="借出中" :value="0" />
+            <el-option label="已归还" :value="1" />
+            <el-option label="逾期未还" :value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="editForm.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmEdit">确定</el-button>
+      </template>
+    </el-dialog>
     
     <div class="search-bar">
       <el-input
@@ -66,6 +114,14 @@
       <el-button @click="handleReset">
         <el-icon><RefreshRight /></el-icon>
         重置
+      </el-button>
+      <el-button 
+        :type="returnMode ? 'warning' : 'default'" 
+        @click="toggleReturnMode"
+        style="margin-left: 20px"
+      >
+        <el-icon><Wallet /></el-icon>
+        归还模式
       </el-button>
       <el-button type="success" @click="handleExport" style="margin-left: 20px">
         <el-icon><Download /></el-icon>
@@ -172,6 +228,21 @@
             </el-select>
           </template>
         </el-table-column>
+        <el-table-column
+          label="操作"
+          width="100"
+          fixed="right"
+        >
+          <template #default="{ row }">
+            <el-button
+              type="primary"
+              size="small"
+              @click="handleEdit(row)"
+            >
+              编辑
+            </el-button>
+          </template>
+        </el-table-column>
       </el-table>
       
       <div class="pagination-container">
@@ -192,13 +263,25 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Document, Search, RefreshRight, Download } from '@element-plus/icons-vue'
+import { Document, Search, RefreshRight, Download, Wallet } from '@element-plus/icons-vue'
 
 const loading = ref(false)
 const searchText = ref('')
 const statusFilter = ref('')
+const returnMode = ref(false)
 const exportDialogVisible = ref(false)
 const exportDateRange = ref(null)
+const editDialogVisible = ref(false)
+const editForm = ref({
+  id: '',
+  name: '',
+  num: '',
+  tel: '',
+  brwtime: '',
+  rtuntime: '',
+  status: 0,
+  remark: ''
+})
 
 const getToday = () => {
   const today = new Date()
@@ -208,8 +291,18 @@ const getToday = () => {
   return `${year}-${month}-${day}`
 }
 
+const getNextMonth = () => {
+  const today = new Date()
+  const nextMonth = new Date(today)
+  nextMonth.setMonth(nextMonth.getMonth() + 1)
+  const year = nextMonth.getFullYear()
+  const month = (nextMonth.getMonth() + 1).toString().padStart(2, '0')
+  const day = nextMonth.getDate().toString().padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const today = getToday()
-const dateRange = ref([today, today])
+const dateRange = ref([today, getNextMonth()])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -227,7 +320,7 @@ const filteredRecords = computed(() => {
     )
   }
   
-  if (statusFilter.value) {
+  if (statusFilter.value && !statusFilter.value.includes(',')) {
     result = result.filter(record => getStatusClass(record) === statusFilter.value)
   }
   
@@ -274,6 +367,10 @@ const fetchData = async () => {
     
     if (dateRange.value && dateRange.value.length === 2) {
       url += `&startDate=${dateRange.value[0]}&endDate=${dateRange.value[1]}`
+    }
+    
+    if (statusFilter.value) {
+      url += `&status=${encodeURIComponent(statusFilter.value)}`
     }
     
     const res = await fetch(url)
@@ -324,6 +421,53 @@ const handleStatusChange = async (row) => {
   }
 }
 
+const handleEdit = (row) => {
+  editForm.value = {
+    id: row.id,
+    name: row.name || '',
+    num: row.num || '',
+    tel: row.tel || '',
+    brwtime: row.brwtime || '',
+    rtuntime: row.rtuntime || '',
+    status: row.status,
+    remark: row.remark || ''
+  }
+  editDialogVisible.value = true
+}
+
+const confirmEdit = async () => {
+  try {
+    const response = await fetch(`/api/rent-records/${editForm.value.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: editForm.value.name,
+        num: editForm.value.num,
+        tel: editForm.value.tel,
+        brwtime: editForm.value.brwtime,
+        rtuntime: editForm.value.rtuntime,
+        status: editForm.value.status,
+        remark: editForm.value.remark
+      })
+    })
+    
+    const data = await response.json()
+    
+    if (data.success) {
+      ElMessage.success(data.message || '订单更新成功')
+      editDialogVisible.value = false
+      await fetchData()
+    } else {
+      ElMessage.error(data.message || '订单更新失败')
+    }
+  } catch (error) {
+    console.error('订单更新失败:', error)
+    ElMessage.error('订单更新失败，请稍后重试')
+  }
+}
+
 const handlePageChange = (page) => {
   currentPage.value = page
   fetchData()
@@ -336,11 +480,47 @@ const handleSizeChange = (size) => {
 }
 
 const handleReset = () => {
+  const today = new Date()
+  const nextMonth = new Date(today)
+  nextMonth.setMonth(nextMonth.getMonth() + 1)
+  
+  const formatDate = (date) => {
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  
   searchText.value = ''
   statusFilter.value = ''
-  dateRange.value = [today, today]
+  returnMode.value = false
+  dateRange.value = [formatDate(today), formatDate(nextMonth)]
   currentPage.value = 1
   pageSize.value = 10
+  fetchData()
+}
+
+const toggleReturnMode = () => {
+  returnMode.value = !returnMode.value
+  
+  if (returnMode.value) {
+    statusFilter.value = 'active,overdue'
+    dateRange.value = null
+  } else {
+    statusFilter.value = ''
+    const today = new Date()
+    const nextMonth = new Date(today)
+    nextMonth.setMonth(nextMonth.getMonth() + 1)
+    const formatDate = (date) => {
+      const year = date.getFullYear()
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const day = date.getDate().toString().padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+    dateRange.value = [formatDate(today), formatDate(nextMonth)]
+  }
+  
+  currentPage.value = 1
   fetchData()
 }
 

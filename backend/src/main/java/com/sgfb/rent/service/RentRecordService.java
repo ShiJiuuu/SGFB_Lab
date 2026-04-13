@@ -112,6 +112,52 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
         return success;
     }
     
+    public boolean updateRentRecord(RentRecord rentRecord) {
+        RentRecord existingRecord = getById(rentRecord.getId());
+        if (existingRecord == null) {
+            return false;
+        }
+        
+        Integer oldStatus = existingRecord.getStatus();
+        Integer newStatus = rentRecord.getStatus();
+        
+        existingRecord.setName(rentRecord.getName());
+        existingRecord.setNum(rentRecord.getNum());
+        existingRecord.setTel(rentRecord.getTel());
+        existingRecord.setBrwtime(rentRecord.getBrwtime());
+        existingRecord.setRtuntime(rentRecord.getRtuntime());
+        existingRecord.setStatus(newStatus);
+        existingRecord.setRemark(rentRecord.getRemark());
+        
+        boolean success = updateById(existingRecord);
+        
+        if (success && oldStatus != newStatus) {
+            if (oldStatus == 0 && newStatus == 1) {
+                updateDeviceStatus(existingRecord.getCamara(), 0);
+                updateDeviceStatus(existingRecord.getLens(), 0);
+                updateDeviceStatus(existingRecord.getOther(), 0);
+            } else if (oldStatus == 0 && newStatus == 2) {
+                updateDeviceStatus(existingRecord.getCamara(), 2);
+                updateDeviceStatus(existingRecord.getLens(), 2);
+                updateDeviceStatus(existingRecord.getOther(), 2);
+            } else if ((oldStatus == 1 || oldStatus == 2) && newStatus == 0) {
+                updateDeviceStatus(existingRecord.getCamara(), 1);
+                updateDeviceStatus(existingRecord.getLens(), 1);
+                updateDeviceStatus(existingRecord.getOther(), 1);
+            } else if (oldStatus == 2 && newStatus == 1) {
+                updateDeviceStatus(existingRecord.getCamara(), 0);
+                updateDeviceStatus(existingRecord.getLens(), 0);
+                updateDeviceStatus(existingRecord.getOther(), 0);
+            } else if (oldStatus == 1 && newStatus == 2) {
+                updateDeviceStatus(existingRecord.getCamara(), 2);
+                updateDeviceStatus(existingRecord.getLens(), 2);
+                updateDeviceStatus(existingRecord.getOther(), 2);
+            }
+        }
+        
+        return success;
+    }
+    
     @Scheduled(fixedRate = 600000)
     public void checkOverdueRecords() {
         LambdaQueryWrapper<RentRecord> wrapper = new LambdaQueryWrapper<>();
