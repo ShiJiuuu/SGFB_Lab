@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 @TableName("RENT_LIST")
@@ -23,8 +24,10 @@ public class RentRecord {
     @TableField("OTHER")
     private Integer other;
     @TableField("BRWTIME")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime brwtime;
     @TableField("RTNTIME")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime rtuntime;
     @TableField("STATUS")
     private Integer status;

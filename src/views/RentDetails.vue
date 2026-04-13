@@ -435,6 +435,17 @@ const handleEdit = (row) => {
   editDialogVisible.value = true
 }
 
+const formatDateTime = (dateValue) => {
+  if (!dateValue) return null
+  const date = new Date(dateValue)
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
 const confirmEdit = async () => {
   try {
     const response = await fetch(`/api/rent-records/${editForm.value.id}`, {
@@ -446,8 +457,8 @@ const confirmEdit = async () => {
         name: editForm.value.name,
         num: editForm.value.num,
         tel: editForm.value.tel,
-        brwtime: editForm.value.brwtime,
-        rtuntime: editForm.value.rtuntime,
+        brwtime: formatDateTime(editForm.value.brwtime),
+        rtuntime: formatDateTime(editForm.value.rtuntime),
         status: editForm.value.status,
         remark: editForm.value.remark
       })
