@@ -17,6 +17,18 @@
         <el-button type="primary" @click="closeAnnounce">我已知悉</el-button>
       </template>
     </el-dialog>
+
+    <div v-if="successModalVisible" class="success-modal-overlay" @click="closeSuccessModal">
+      <div class="success-modal-content" @click.stop>
+        <div class="success-icon">
+          <el-icon :size="80" color="#67c23a">
+            <CircleCheck />
+          </el-icon>
+        </div>
+        <h2 class="success-title">设备预约成功</h2>
+        <p class="success-text">您的预约申请已成功提交，请按时领取设备</p>
+      </div>
+    </div>
     
     <el-form
       ref="borrowFormRef"
@@ -184,7 +196,8 @@ import {
   Calendar, 
   Document,
   Check,
-  RefreshRight
+  RefreshRight,
+  CircleCheck
 } from '@element-plus/icons-vue'
 
 const borrowFormRef = ref()
@@ -194,6 +207,8 @@ const lensList = ref([])
 const otherList = ref([])
 const announceVisible = ref(false)
 const announceContent = ref('')
+const successModalVisible = ref(false)
+let successModalTimer = null
 
 const renderedContent = computed(() => {
   return announceContent.value ? marked(announceContent.value) : ''
@@ -335,6 +350,11 @@ const handleSubmit = async () => {
   await borrowFormRef.value.validate(async (valid) => {
     if (!valid) return
     
+    if (!borrowForm.camera && !borrowForm.lens && !borrowForm.other) {
+      ElMessage.warning('请至少选择一个设备')
+      return
+    }
+    
     loading.value = true
     
     try {
@@ -359,7 +379,7 @@ const handleSubmit = async () => {
       const data = await response.json()
       
       if (data.success) {
-        ElMessage.success('提交成功！')
+        showSuccessModal()
         handleReset()
       } else {
         ElMessage.error(data.message || '提交失败')
@@ -378,6 +398,24 @@ const handleReset = () => {
     borrowFormRef.value.resetFields()
   }
   borrowForm.remark = ''
+}
+
+const showSuccessModal = () => {
+  successModalVisible.value = true
+  if (successModalTimer) {
+    clearTimeout(successModalTimer)
+  }
+  successModalTimer = setTimeout(() => {
+    closeSuccessModal()
+  }, 3000)
+}
+
+const closeSuccessModal = () => {
+  successModalVisible.value = false
+  if (successModalTimer) {
+    clearTimeout(successModalTimer)
+    successModalTimer = null
+  }
 }
 
 watch([() => borrowForm.borrowDate, () => borrowForm.returnDate], ([newBorrow, newReturn]) => {
@@ -459,6 +497,77 @@ const closeAnnounce = () => {
   margin-top: 30px;
 }
 
+.success-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.success-modal-content {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 60px 80px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.3s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-icon {
+  margin-bottom: 20px;
+  animation: iconBounce 0.5s ease;
+}
+
+@keyframes iconBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.success-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #303133;
+  margin: 0 0 15px 0;
+}
+
+.success-text {
+  font-size: 16px;
+  color: #606266;
+  margin: 0;
+  line-height: 1.6;
+}
+
 :deep(.el-divider__text) {
   display: flex;
   align-items: center;
@@ -483,6 +592,19 @@ const closeAnnounce = () => {
   .button-group {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .success-modal-content {
+    padding: 40px 30px;
+    margin: 20px;
+  }
+
+  .success-title {
+    font-size: 24px;
+  }
+
+  .success-text {
+    font-size: 14px;
   }
 }
 </style>

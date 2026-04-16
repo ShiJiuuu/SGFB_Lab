@@ -1,7 +1,8 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h2>影视器材预约系统管理 - 登录</h2>
+      <h2>影视器材预约系统后台管理</h2>
+      <p class="login-hint">（此为后台管理页面，预约请选择"预约申请"页面）</p>
       <form @submit.prevent="handleLogin">
         <div class="form-item">
           <label>用户名：</label>
@@ -91,8 +92,16 @@ const handleLogin = async () => {
 
 .login-card h2 {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   color: #304156;
+}
+
+.login-hint {
+  text-align: center;
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 30px;
+  line-height: 1.5;
 }
 
 .form-item {
