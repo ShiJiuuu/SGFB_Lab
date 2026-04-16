@@ -51,24 +51,27 @@ public class RentRecordController {
             item.put("status", record.getStatus());
             item.put("remark", record.getRemark());
 
-            Map<String, Object> camaraInfo = new HashMap<>();
+            Map<String, Object> camaraInfo = null;
             if (record.getCamara() != null) {
+                camaraInfo = new HashMap<>();
                 Device camara = deviceMap.get(record.getCamara());
                 camaraInfo.put("id", record.getCamara());
                 camaraInfo.put("name", camara != null ? camara.getName() : "未知设备");
             }
             item.put("camara", camaraInfo);
 
-            Map<String, Object> lensInfo = new HashMap<>();
+            Map<String, Object> lensInfo = null;
             if (record.getLens() != null) {
+                lensInfo = new HashMap<>();
                 Device lens = deviceMap.get(record.getLens());
                 lensInfo.put("id", record.getLens());
                 lensInfo.put("name", lens != null ? lens.getName() : "未知设备");
             }
             item.put("lens", lensInfo);
 
-            Map<String, Object> otherInfo = new HashMap<>();
+            Map<String, Object> otherInfo = null;
             if (record.getOther() != null) {
+                otherInfo = new HashMap<>();
                 Device other = deviceMap.get(record.getOther());
                 otherInfo.put("id", record.getOther());
                 otherInfo.put("name", other != null ? other.getName() : "未知设备");

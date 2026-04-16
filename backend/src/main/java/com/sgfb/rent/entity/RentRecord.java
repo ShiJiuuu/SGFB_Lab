@@ -1,6 +1,7 @@
 package com.sgfb.rent.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -17,11 +18,11 @@ public class RentRecord {
     private String num;
     @TableField("TEL")
     private String tel;
-    @TableField("CAMARA")
+    @TableField(value = "CAMARA", updateStrategy = FieldStrategy.IGNORED)
     private Integer camara;
-    @TableField("LENS")
+    @TableField(value = "LENS", updateStrategy = FieldStrategy.IGNORED)
     private Integer lens;
-    @TableField("OTHER")
+    @TableField(value = "OTHER", updateStrategy = FieldStrategy.IGNORED)
     private Integer other;
     @TableField("BRWTIME")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
