@@ -26,7 +26,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="editDialogVisible" title="修改订单" width="500px">
+    <el-dialog v-model="editDialogVisible" title="修改订单" width="600px">
       <el-form :model="editForm" label-width="100px">
         <el-form-item label="姓名">
           <el-input v-model="editForm.name" placeholder="请输入姓名" />
@@ -36,6 +36,54 @@
         </el-form-item>
         <el-form-item label="手机号">
           <el-input v-model="editForm.tel" placeholder="请输入手机号" />
+        </el-form-item>
+        <el-form-item label="相机">
+          <el-select
+            v-model="editForm.camara"
+            placeholder="请选择相机"
+            clearable
+            filterable
+            style="width: 100%"
+          >
+            <el-option
+              v-for="device in camaraList"
+              :key="device.id"
+              :label="device.name + ' (' + device.brand + ')'"
+              :value="device.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="镜头">
+          <el-select
+            v-model="editForm.lens"
+            placeholder="请选择镜头"
+            clearable
+            filterable
+            style="width: 100%"
+          >
+            <el-option
+              v-for="device in lensList"
+              :key="device.id"
+              :label="device.name + ' (' + device.brand + ')'"
+              :value="device.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="其他设备">
+          <el-select
+            v-model="editForm.other"
+            placeholder="请选择其他设备"
+            clearable
+            filterable
+            style="width: 100%"
+          >
+            <el-option
+              v-for="device in otherDeviceList"
+              :key="device.id"
+              :label="device.name + ' (' + device.brand + ')'"
+              :value="device.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="预约时间">
           <el-date-picker
@@ -268,7 +316,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Document, Search, RefreshRight, Download, Wallet } from '@element-plus/icons-vue'
 
@@ -284,11 +332,18 @@ const editForm = ref({
   name: '',
   num: '',
   tel: '',
+  camara: null,
+  lens: null,
+  other: null,
   brwtime: '',
   rtuntime: '',
   status: 0,
   remark: ''
 })
+
+const camaraList = ref([])
+const lensList = ref([])
+const otherDeviceList = ref([])
 
 const getToday = () => {
   const today = new Date()
@@ -314,6 +369,94 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const rentRecords = ref([])
+
+const fetchDevices = async () => {
+  try {
+    const brwtime = editForm.value.brwtime
+    const rtuntime = editForm.value.rtuntime
+
+    const formatDateParam = (dateStr) => {
+      if (!dateStr) return ''
+      const date = new Date(dateStr)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      return `${year}-${month}-${day} ${hours}:${minutes}`
+    }
+
+    const formattedBrwtime = formatDateParam(brwtime)
+    const formattedRtuntime = formatDateParam(rtuntime)
+
+    if (formattedBrwtime && formattedRtuntime) {
+      const url = `/api/devices/available?borrowTime=${encodeURIComponent(formattedBrwtime)}&returnTime=${encodeURIComponent(formattedRtuntime)}`
+      const response = await fetch(url)
+      const data = await response.json()
+      if (data.success) {
+        const allAvailable = data.data
+        const isCamera = (type) => type && (type.includes('相机') || type.toLowerCase().includes('camara'))
+        const isLens = (type) => type && (type.includes('镜头') || type.toLowerCase().includes('lens'))
+        camaraList.value = allAvailable.filter(d => isCamera(d.type))
+        lensList.value = allAvailable.filter(d => isLens(d.type))
+        otherDeviceList.value = allAvailable.filter(d => !isCamera(d.type) && !isLens(d.type))
+
+        if (editForm.value.camara) {
+          const camaraSelected = camaraList.value.find(d => d.id === editForm.value.camara)
+          if (!camaraSelected) {
+            const allResponse = await fetch('/api/devices')
+            const allData = await allResponse.json()
+            if (allData.success) {
+              const device = allData.data.find(d => d.id === editForm.value.camara)
+              if (device && isCamera(device.type)) {
+                camaraList.value.push(device)
+              }
+            }
+          }
+        }
+        if (editForm.value.lens) {
+          const lensSelected = lensList.value.find(d => d.id === editForm.value.lens)
+          if (!lensSelected) {
+            const allResponse = await fetch('/api/devices')
+            const allData = await allResponse.json()
+            if (allData.success) {
+              const device = allData.data.find(d => d.id === editForm.value.lens)
+              if (device && isLens(device.type)) {
+                lensList.value.push(device)
+              }
+            }
+          }
+        }
+        if (editForm.value.other) {
+          const otherSelected = otherDeviceList.value.find(d => d.id === editForm.value.other)
+          if (!otherSelected) {
+            const allResponse = await fetch('/api/devices')
+            const allData = await allResponse.json()
+            if (allData.success) {
+              const device = allData.data.find(d => d.id === editForm.value.other)
+              if (device && !isCamera(device.type) && !isLens(device.type)) {
+                otherDeviceList.value.push(device)
+              }
+            }
+          }
+        }
+      }
+    } else {
+      const response = await fetch('/api/devices')
+      const data = await response.json()
+      if (data.success) {
+        const allDevices = data.data
+        const isCamera = (type) => type && (type.includes('相机') || type.toLowerCase().includes('camara'))
+        const isLens = (type) => type && (type.includes('镜头') || type.toLowerCase().includes('lens'))
+        camaraList.value = allDevices.filter(d => isCamera(d.type))
+        lensList.value = allDevices.filter(d => isLens(d.type))
+        otherDeviceList.value = allDevices.filter(d => !isCamera(d.type) && !isLens(d.type))
+      }
+    }
+  } catch (error) {
+    console.error('获取设备列表失败:', error)
+  }
+}
 
 const filteredRecords = computed(() => {
   let result = rentRecords.value
@@ -434,6 +577,9 @@ const handleEdit = (row) => {
     name: row.name || '',
     num: row.num || '',
     tel: row.tel || '',
+    camara: row.camara?.id || null,
+    lens: row.lens?.id || null,
+    other: row.other?.id || null,
     brwtime: row.brwtime || '',
     rtuntime: row.rtuntime || '',
     status: row.status,
@@ -464,6 +610,9 @@ const confirmEdit = async () => {
         name: editForm.value.name,
         num: editForm.value.num,
         tel: editForm.value.tel,
+        camara: editForm.value.camara,
+        lens: editForm.value.lens,
+        other: editForm.value.other,
         brwtime: formatDateTime(editForm.value.brwtime),
         rtuntime: formatDateTime(editForm.value.rtuntime),
         status: editForm.value.status,
@@ -632,6 +781,13 @@ const confirmExport = async () => {
 
 onMounted(() => {
   fetchData()
+  fetchDevices()
+})
+
+watch([() => editForm.value.brwtime, () => editForm.value.rtuntime], () => {
+  if (editDialogVisible.value) {
+    fetchDevices()
+  }
 })
 </script>
 

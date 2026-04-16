@@ -209,9 +209,18 @@ public class RentRecordController {
             @PathVariable String id,
             @RequestBody RentRecord rentRecord) {
         rentRecord.setId(id);
-        boolean success = rentRecordService.updateRentRecord(rentRecord);
-        
+
+        boolean hasConflict = rentRecordService.checkTimeConflictForUpdate(rentRecord);
+
         Map<String, Object> result = new HashMap<>();
+        if (hasConflict) {
+            result.put("success", false);
+            result.put("message", "更新失败：所选设备在该时间段已被其他订单占用");
+            return ResponseEntity.ok(result);
+        }
+
+        boolean success = rentRecordService.updateRentRecord(rentRecord);
+
         if (success) {
             result.put("success", true);
             result.put("message", "订单更新成功");
@@ -219,7 +228,7 @@ public class RentRecordController {
             result.put("success", false);
             result.put("message", "订单更新失败");
         }
-        
+
         return ResponseEntity.ok(result);
     }
 

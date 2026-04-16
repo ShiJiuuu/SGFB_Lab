@@ -63,6 +63,25 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
         }
         return false;
     }
+
+    public boolean checkTimeConflictForUpdate(RentRecord rentRecord) {
+        if (rentRecord.getCamara() != null) {
+            if (!deviceService.isDeviceAvailable(rentRecord.getCamara(), rentRecord.getBrwtime(), rentRecord.getRtuntime(), rentRecord.getId())) {
+                return true;
+            }
+        }
+        if (rentRecord.getLens() != null) {
+            if (!deviceService.isDeviceAvailable(rentRecord.getLens(), rentRecord.getBrwtime(), rentRecord.getRtuntime(), rentRecord.getId())) {
+                return true;
+            }
+        }
+        if (rentRecord.getOther() != null) {
+            if (!deviceService.isDeviceAvailable(rentRecord.getOther(), rentRecord.getBrwtime(), rentRecord.getRtuntime(), rentRecord.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     private void updateDeviceStatus(Integer deviceId, Integer status) {
         if (deviceId != null) {
@@ -117,44 +136,47 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
         if (existingRecord == null) {
             return false;
         }
-        
+
         Integer oldStatus = existingRecord.getStatus();
         Integer newStatus = rentRecord.getStatus();
-        
+        Integer oldCamara = existingRecord.getCamara();
+        Integer oldLens = existingRecord.getLens();
+        Integer oldOther = existingRecord.getOther();
+        Integer newCamara = rentRecord.getCamara();
+        Integer newLens = rentRecord.getLens();
+        Integer newOther = rentRecord.getOther();
+
         existingRecord.setName(rentRecord.getName());
         existingRecord.setNum(rentRecord.getNum());
         existingRecord.setTel(rentRecord.getTel());
+        existingRecord.setCamara(newCamara);
+        existingRecord.setLens(newLens);
+        existingRecord.setOther(newOther);
         existingRecord.setBrwtime(rentRecord.getBrwtime());
         existingRecord.setRtuntime(rentRecord.getRtuntime());
         existingRecord.setStatus(newStatus);
         existingRecord.setRemark(rentRecord.getRemark());
-        
+
         boolean success = updateById(existingRecord);
-        
-        if (success && oldStatus != newStatus) {
-            if (oldStatus == 0 && newStatus == 1) {
-                updateDeviceStatus(existingRecord.getCamara(), 0);
-                updateDeviceStatus(existingRecord.getLens(), 0);
-                updateDeviceStatus(existingRecord.getOther(), 0);
-            } else if (oldStatus == 0 && newStatus == 2) {
-                updateDeviceStatus(existingRecord.getCamara(), 2);
-                updateDeviceStatus(existingRecord.getLens(), 2);
-                updateDeviceStatus(existingRecord.getOther(), 2);
-            } else if ((oldStatus == 1 || oldStatus == 2) && newStatus == 0) {
-                updateDeviceStatus(existingRecord.getCamara(), 1);
-                updateDeviceStatus(existingRecord.getLens(), 1);
-                updateDeviceStatus(existingRecord.getOther(), 1);
-            } else if (oldStatus == 2 && newStatus == 1) {
-                updateDeviceStatus(existingRecord.getCamara(), 0);
-                updateDeviceStatus(existingRecord.getLens(), 0);
-                updateDeviceStatus(existingRecord.getOther(), 0);
-            } else if (oldStatus == 1 && newStatus == 2) {
-                updateDeviceStatus(existingRecord.getCamara(), 2);
-                updateDeviceStatus(existingRecord.getLens(), 2);
-                updateDeviceStatus(existingRecord.getOther(), 2);
+
+        if (success) {
+            if (oldStatus != null && oldStatus == 0) {
+                updateDeviceStatus(oldCamara, 0);
+                updateDeviceStatus(oldLens, 0);
+                updateDeviceStatus(oldOther, 0);
+            }
+
+            if (newStatus != null && newStatus == 0) {
+                updateDeviceStatus(newCamara, 1);
+                updateDeviceStatus(newLens, 1);
+                updateDeviceStatus(newOther, 1);
+            } else if (newStatus != null && newStatus == 2) {
+                updateDeviceStatus(newCamara, 2);
+                updateDeviceStatus(newLens, 2);
+                updateDeviceStatus(newOther, 2);
             }
         }
-        
+
         return success;
     }
 
