@@ -236,17 +236,38 @@ const getStatusClass = (rental) => {
 
 const previousDay = () => {
   currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth(), currentDate.value.getDate() - 1)
+  fetchData()
 }
 
 const nextDay = () => {
   currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth(), currentDate.value.getDate() + 1)
+  fetchData()
 }
 
 const gotoToday = () => {
   currentDate.value = new Date()
+  fetchData()
 }
 
 const updateTimeline = () => {
+  fetchData()
+}
+
+const formatDateTime = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
+const buildGanttTimeParam = () => {
+  const baseDate = new Date(currentDate.value)
+  baseDate.setHours(0, 0, 0, 0)
+  const timelineEnd = new Date(baseDate)
+  timelineEnd.setDate(timelineEnd.getDate() + 4)
+  return formatDateTime(timelineEnd)
 }
 
 const handleHeaderScroll = () => {
@@ -273,9 +294,10 @@ const handleBodyScroll = () => {
 
 const fetchData = async () => {
   try {
+    const timeParam = encodeURIComponent(buildGanttTimeParam())
     const [devicesRes, recordsRes] = await Promise.all([
       fetch('/api/devices'),
-      fetch('/api/rent-records')
+      fetch(`/api/rent-records/gantt?time=${timeParam}`)
     ])
     
     const devicesData = await devicesRes.json()

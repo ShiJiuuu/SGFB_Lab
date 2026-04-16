@@ -31,6 +31,54 @@ public class RentRecordController {
     
     @Autowired
     private DeviceService deviceService;
+
+    private List<Map<String, Object>> enrichRentRecords(List<RentRecord> records) {
+        List<Device> devices = deviceService.getAllDevices();
+        Map<Integer, Device> deviceMap = new HashMap<>();
+        for (Device device : devices) {
+            deviceMap.put(device.getId(), device);
+        }
+
+        List<Map<String, Object>> enrichedRecords = new ArrayList<>();
+        for (RentRecord record : records) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", record.getId());
+            item.put("name", record.getName());
+            item.put("num", record.getNum());
+            item.put("tel", record.getTel());
+            item.put("brwtime", record.getBrwtime());
+            item.put("rtuntime", record.getRtuntime());
+            item.put("status", record.getStatus());
+            item.put("remark", record.getRemark());
+
+            Map<String, Object> camaraInfo = new HashMap<>();
+            if (record.getCamara() != null) {
+                Device camara = deviceMap.get(record.getCamara());
+                camaraInfo.put("id", record.getCamara());
+                camaraInfo.put("name", camara != null ? camara.getName() : "未知设备");
+            }
+            item.put("camara", camaraInfo);
+
+            Map<String, Object> lensInfo = new HashMap<>();
+            if (record.getLens() != null) {
+                Device lens = deviceMap.get(record.getLens());
+                lensInfo.put("id", record.getLens());
+                lensInfo.put("name", lens != null ? lens.getName() : "未知设备");
+            }
+            item.put("lens", lensInfo);
+
+            Map<String, Object> otherInfo = new HashMap<>();
+            if (record.getOther() != null) {
+                Device other = deviceMap.get(record.getOther());
+                otherInfo.put("id", record.getOther());
+                otherInfo.put("name", other != null ? other.getName() : "未知设备");
+            }
+            item.put("other", otherInfo);
+
+            enrichedRecords.add(item);
+        }
+        return enrichedRecords;
+    }
     
     @GetMapping("/rent-records")
     public ResponseEntity<Map<String, Object>> getAllRentRecords(
@@ -81,51 +129,7 @@ public class RentRecordController {
         
         Page<RentRecord> pageResult = rentRecordService.page(new Page<>(page, pageSize), wrapper);
         List<RentRecord> records = pageResult.getRecords();
-        List<Device> devices = deviceService.getAllDevices();
-        
-        Map<Integer, Device> deviceMap = new HashMap<>();
-        for (Device device : devices) {
-            deviceMap.put(device.getId(), device);
-        }
-        
-        List<Map<String, Object>> enrichedRecords = new ArrayList<>();
-        for (RentRecord record : records) {
-            Map<String, Object> item = new HashMap<>();
-            item.put("id", record.getId());
-            item.put("name", record.getName());
-            item.put("num", record.getNum());
-            item.put("tel", record.getTel());
-            item.put("brwtime", record.getBrwtime());
-            item.put("rtuntime", record.getRtuntime());
-            item.put("status", record.getStatus());
-            item.put("remark", record.getRemark());
-            
-            Map<String, Object> camaraInfo = new HashMap<>();
-            if (record.getCamara() != null) {
-                Device camara = deviceMap.get(record.getCamara());
-                camaraInfo.put("id", record.getCamara());
-                camaraInfo.put("name", camara != null ? camara.getName() : "未知设备");
-            }
-            item.put("camara", camaraInfo);
-            
-            Map<String, Object> lensInfo = new HashMap<>();
-            if (record.getLens() != null) {
-                Device lens = deviceMap.get(record.getLens());
-                lensInfo.put("id", record.getLens());
-                lensInfo.put("name", lens != null ? lens.getName() : "未知设备");
-            }
-            item.put("lens", lensInfo);
-            
-            Map<String, Object> otherInfo = new HashMap<>();
-            if (record.getOther() != null) {
-                Device other = deviceMap.get(record.getOther());
-                otherInfo.put("id", record.getOther());
-                otherInfo.put("name", other != null ? other.getName() : "未知设备");
-            }
-            item.put("other", otherInfo);
-            
-            enrichedRecords.add(item);
-        }
+        List<Map<String, Object>> enrichedRecords = enrichRentRecords(records);
         
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
@@ -134,6 +138,26 @@ public class RentRecordController {
         result.put("page", pageResult.getCurrent());
         result.put("pageSize", pageResult.getSize());
         
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/rent-records/gantt")
+    public ResponseEntity<Map<String, Object>> getGanttRentRecords(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") LocalDateTime time) {
+        LocalDateTime timelineEnd = time != null ? time : LocalDateTime.now().plusDays(4);
+        LocalDateTime timelineStart = timelineEnd.minusDays(4);
+
+        LambdaQueryWrapper<RentRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.le(RentRecord::getBrwtime, timelineEnd)
+                .ge(RentRecord::getRtuntime, timelineStart)
+                .orderByDesc(RentRecord::getBrwtime);
+
+        List<RentRecord> records = rentRecordService.list(wrapper);
+        List<Map<String, Object>> enrichedRecords = enrichRentRecords(records);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("data", enrichedRecords);
         return ResponseEntity.ok(result);
     }
     
