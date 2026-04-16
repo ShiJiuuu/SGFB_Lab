@@ -157,6 +157,26 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
         
         return success;
     }
+
+    @Transactional
+    public boolean deleteRentRecord(String id) {
+        RentRecord existingRecord = getById(id);
+        if (existingRecord == null) {
+            return false;
+        }
+
+        boolean success = removeById(id);
+        if (!success) {
+            return false;
+        }
+
+        if (existingRecord.getStatus() != null && (existingRecord.getStatus() == 0 || existingRecord.getStatus() == 2)) {
+            updateDeviceStatus(existingRecord.getCamara(), 0);
+            updateDeviceStatus(existingRecord.getLens(), 0);
+            updateDeviceStatus(existingRecord.getOther(), 0);
+        }
+        return true;
+    }
     
     @Scheduled(fixedRate = 600000)
     public void checkOverdueRecords() {

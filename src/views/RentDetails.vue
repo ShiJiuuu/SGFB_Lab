@@ -230,7 +230,7 @@
         </el-table-column>
         <el-table-column
           label="操作"
-          width="100"
+          width="170"
           fixed="right"
         >
           <template #default="{ row }">
@@ -240,6 +240,13 @@
               @click="handleEdit(row)"
             >
               编辑
+            </el-button>
+            <el-button
+              type="danger"
+              size="small"
+              @click="handleDelete(row)"
+            >
+              删除
             </el-button>
           </template>
         </el-table-column>
@@ -262,7 +269,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Document, Search, RefreshRight, Download, Wallet } from '@element-plus/icons-vue'
 
 const loading = ref(false)
@@ -476,6 +483,37 @@ const confirmEdit = async () => {
   } catch (error) {
     console.error('订单更新失败:', error)
     ElMessage.error('订单更新失败，请稍后重试')
+  }
+}
+
+const handleDelete = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确认删除订单 ${row.id} 吗？该操作不可恢复。`,
+      '删除确认',
+      {
+        confirmButtonText: '确认删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    const response = await fetch(`/api/rent-records/${row.id}`, {
+      method: 'DELETE'
+    })
+    const data = await response.json()
+
+    if (data.success) {
+      ElMessage.success(data.message || '订单删除成功')
+      await fetchData()
+    } else {
+      ElMessage.error(data.message || '订单删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('订单删除失败:', error)
+      ElMessage.error('订单删除失败，请稍后重试')
+    }
   }
 }
 

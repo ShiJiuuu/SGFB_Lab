@@ -222,6 +222,22 @@ public class RentRecordController {
         
         return ResponseEntity.ok(result);
     }
+
+    @DeleteMapping("/rent-records/{id}")
+    public ResponseEntity<Map<String, Object>> deleteRentRecord(@PathVariable String id) {
+        boolean success = rentRecordService.deleteRentRecord(id);
+
+        Map<String, Object> result = new HashMap<>();
+        if (success) {
+            result.put("success", true);
+            result.put("message", "订单删除成功");
+        } else {
+            result.put("success", false);
+            result.put("message", "订单删除失败");
+        }
+
+        return ResponseEntity.ok(result);
+    }
     
     @GetMapping("/rent-records/export")
     public ResponseEntity<byte[]> exportRentRecords(
