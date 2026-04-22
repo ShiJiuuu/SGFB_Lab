@@ -34,15 +34,15 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
     public boolean addRentRecord(RentRecord rentRecord) {
         rentRecord.setId(generateId());
         rentRecord.setStatus(0);
-        boolean success = save(rentRecord);
+        boolean saved = save(rentRecord);
         
-        if (success) {
-            updateDeviceStatus(rentRecord.getCamara(), 1);
-            updateDeviceStatus(rentRecord.getLens(), 1);
-            updateDeviceStatus(rentRecord.getOther(), 1);
+        if (saved) {
+            updateDeviceIfNeeded(rentRecord.getCamara(), 1);
+            updateDeviceIfNeeded(rentRecord.getLens(), 1);
+            updateDeviceIfNeeded(rentRecord.getOther(), 1);
         }
         
-        return success;
+        return saved;
     }
     
     public boolean checkTimeConflict(RentRecord rentRecord) {
@@ -83,17 +83,6 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
         return false;
     }
     
-    private void updateDeviceStatus(Integer deviceId, Integer status) {
-        if (deviceId != null) {
-            Device device = deviceService.getById(deviceId);
-            if (device != null) {
-                device.setStatus(status);
-                deviceService.updateById(device);
-            }
-        }
-    }
-    
-    @Transactional
     public boolean updateRentRecordStatus(String id, Integer status) {
         RentRecord record = getById(id);
         if (record == null) {
@@ -102,33 +91,39 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
         
         Integer oldStatus = record.getStatus();
         record.setStatus(status);
-        boolean success = updateById(record);
+        boolean updated = updateById(record);
         
-        if (success) {
-            if (oldStatus == 0 && status == 1) {
-                updateDeviceStatus(record.getCamara(), 0);
-                updateDeviceStatus(record.getLens(), 0);
-                updateDeviceStatus(record.getOther(), 0);
-            } else if (oldStatus == 0 && status == 2) {
-                updateDeviceStatus(record.getCamara(), 2);
-                updateDeviceStatus(record.getLens(), 2);
-                updateDeviceStatus(record.getOther(), 2);
-            } else if ((oldStatus == 1 || oldStatus == 2) && status == 0) {
-                updateDeviceStatus(record.getCamara(), 1);
-                updateDeviceStatus(record.getLens(), 1);
-                updateDeviceStatus(record.getOther(), 1);
-            } else if (oldStatus == 2 && status == 1) {
-                updateDeviceStatus(record.getCamara(), 0);
-                updateDeviceStatus(record.getLens(), 0);
-                updateDeviceStatus(record.getOther(), 0);
-            } else if (oldStatus == 1 && status == 2) {
-                updateDeviceStatus(record.getCamara(), 2);
-                updateDeviceStatus(record.getLens(), 2);
-                updateDeviceStatus(record.getOther(), 2);
-            }
+        if (updated) {
+            updateDeviceStatusForOrder(record, oldStatus, status);
         }
         
-        return success;
+        return updated;
+    }
+    
+    private void updateDeviceStatusForOrder(RentRecord record, Integer oldStatus, Integer newStatus) {
+        if (newStatus == 0 || newStatus == 3) {
+            // 订单变为"已预约"或"已借出" → 设备库存变为"已预约借出"
+            updateDeviceIfNeeded(record.getCamara(), 1);
+            updateDeviceIfNeeded(record.getLens(), 1);
+            updateDeviceIfNeeded(record.getOther(), 1);
+        } else if (newStatus == 1) {
+            // 订单变为"已归还" → 设备库存恢复为"正常库存"
+            updateDeviceIfNeeded(record.getCamara(), 0);
+            updateDeviceIfNeeded(record.getLens(), 0);
+            updateDeviceIfNeeded(record.getOther(), 0);
+        }
+        // 订单变为"逾期未还"(2)时不更改库存
+    }
+    
+    private void updateDeviceIfNeeded(Integer deviceId, Integer targetStatus) {
+        if (deviceId == null) {
+            return;
+        }
+        Device device = deviceService.getById(deviceId);
+        if (device != null && device.getStatus() != targetStatus) {
+            device.setStatus(targetStatus);
+            deviceService.updateById(device);
+        }
     }
     
     public boolean updateRentRecord(RentRecord rentRecord) {
@@ -137,47 +132,18 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
             return false;
         }
 
-        Integer oldStatus = existingRecord.getStatus();
-        Integer newStatus = rentRecord.getStatus();
-        Integer oldCamara = existingRecord.getCamara();
-        Integer oldLens = existingRecord.getLens();
-        Integer oldOther = existingRecord.getOther();
-        Integer newCamara = rentRecord.getCamara();
-        Integer newLens = rentRecord.getLens();
-        Integer newOther = rentRecord.getOther();
-
         existingRecord.setName(rentRecord.getName());
         existingRecord.setNum(rentRecord.getNum());
         existingRecord.setTel(rentRecord.getTel());
-        existingRecord.setCamara(newCamara);
-        existingRecord.setLens(newLens);
-        existingRecord.setOther(newOther);
+        existingRecord.setCamara(rentRecord.getCamara());
+        existingRecord.setLens(rentRecord.getLens());
+        existingRecord.setOther(rentRecord.getOther());
         existingRecord.setBrwtime(rentRecord.getBrwtime());
         existingRecord.setRtuntime(rentRecord.getRtuntime());
-        existingRecord.setStatus(newStatus);
+        existingRecord.setStatus(rentRecord.getStatus());
         existingRecord.setRemark(rentRecord.getRemark());
 
-        boolean success = updateById(existingRecord);
-
-        if (success) {
-            if (oldStatus != null && oldStatus == 0) {
-                updateDeviceStatus(oldCamara, 0);
-                updateDeviceStatus(oldLens, 0);
-                updateDeviceStatus(oldOther, 0);
-            }
-
-            if (newStatus != null && newStatus == 0) {
-                updateDeviceStatus(newCamara, 1);
-                updateDeviceStatus(newLens, 1);
-                updateDeviceStatus(newOther, 1);
-            } else if (newStatus != null && newStatus == 2) {
-                updateDeviceStatus(newCamara, 2);
-                updateDeviceStatus(newLens, 2);
-                updateDeviceStatus(newOther, 2);
-            }
-        }
-
-        return success;
+        return updateById(existingRecord);
     }
 
     @Transactional
@@ -187,34 +153,28 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
             return false;
         }
 
-        boolean success = removeById(id);
-        if (!success) {
-            return false;
+        // 删除订单时，如果订单是"已预约"状态，恢复设备库存为"正常库存"
+        if (existingRecord.getStatus() == 0) {
+            updateDeviceIfNeeded(existingRecord.getCamara(), 0);
+            updateDeviceIfNeeded(existingRecord.getLens(), 0);
+            updateDeviceIfNeeded(existingRecord.getOther(), 0);
         }
 
-        if (existingRecord.getStatus() != null && (existingRecord.getStatus() == 0 || existingRecord.getStatus() == 2)) {
-            updateDeviceStatus(existingRecord.getCamara(), 0);
-            updateDeviceStatus(existingRecord.getLens(), 0);
-            updateDeviceStatus(existingRecord.getOther(), 0);
-        }
-        return true;
+        return removeById(id);
     }
     
     @Scheduled(fixedRate = 600000)
     public void checkOverdueRecords() {
         LambdaQueryWrapper<RentRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(RentRecord::getStatus, 0);
-        List<RentRecord> activeRecords = list(wrapper);
+        wrapper.eq(RentRecord::getStatus, 3);
+        List<RentRecord> borrowedRecords = list(wrapper);
         
         LocalDateTime now = LocalDateTime.now();
         
-        for (RentRecord record : activeRecords) {
+        for (RentRecord record : borrowedRecords) {
             if (record.getRtuntime() != null && record.getRtuntime().isBefore(now)) {
                 record.setStatus(2);
                 updateById(record);
-                updateDeviceStatus(record.getCamara(), 2);
-                updateDeviceStatus(record.getLens(), 2);
-                updateDeviceStatus(record.getOther(), 2);
             }
         }
     }

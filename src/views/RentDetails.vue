@@ -107,9 +107,18 @@
         </el-form-item>
         <el-form-item label="订单状态">
           <el-select v-model="editForm.status" placeholder="请选择状态" style="width: 100%">
-            <el-option label="借出中" :value="0" />
-            <el-option label="已归还" :value="1" />
-            <el-option label="逾期未还" :value="2" />
+            <el-option label="已预约" :value="0">
+              <span style="color: #e6a23c">已预约</span>
+            </el-option>
+            <el-option label="已借出" :value="3">
+              <span style="color: #409eff">已借出</span>
+            </el-option>
+            <el-option label="已归还" :value="1">
+              <span style="color: #67c23a">已归还</span>
+            </el-option>
+            <el-option label="逾期未还" :value="2">
+              <span style="color: #f56c6c">逾期未还</span>
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="备注">
@@ -140,7 +149,8 @@
         @clear="fetchData"
       >
         <el-option label="全部" value="" />
-        <el-option label="借出中" value="active" />
+        <el-option label="已预约" value="reserved" />
+        <el-option label="已借出" value="borrowed" />
         <el-option label="已归还" value="returned" />
         <el-option label="逾期未还" value="overdue" />
       </el-select>
@@ -270,9 +280,18 @@
               style="width: 100%"
               @change="handleStatusChange(row)"
             >
-              <el-option label="借出中" :value="0" />
-              <el-option label="已归还" :value="1" />
-              <el-option label="逾期未还" :value="2" />
+              <el-option label="已预约" :value="0">
+                <span style="color: #e6a23c">已预约</span>
+              </el-option>
+              <el-option label="已借出" :value="3">
+                <span style="color: #409eff">已借出</span>
+              </el-option>
+              <el-option label="已归还" :value="1">
+                <span style="color: #67c23a">已归还</span>
+              </el-option>
+              <el-option label="逾期未还" :value="2">
+                <span style="color: #f56c6c">逾期未还</span>
+              </el-option>
             </el-select>
           </template>
         </el-table-column>
@@ -490,22 +509,25 @@ const formatTime = (timeStr) => {
 
 const getStatusClass = (rental) => {
   const status = rental.status
-  if (status === 0) return 'active'
-  if (status === 1) return 'returned'
-  if (status === 2) return 'overdue'
-  return 'returned'
+  if (status === 0) return 'reserved'   // 已预约
+  if (status === 1) return 'returned'   // 已归还
+  if (status === 2) return 'overdue'    // 逾期未还
+  if (status === 3) return 'borrowed'   // 已借出
+  return 'reserved'
 }
 
 const getStatusType = (rental) => {
   const status = getStatusClass(rental)
-  if (status === 'active') return 'primary'
-  if (status === 'overdue') return 'danger'
-  return 'success'
+  if (status === 'reserved') return 'warning'   // 已预约 - 黄色
+  if (status === 'borrowed') return 'primary'   // 已借出 - 蓝色
+  if (status === 'overdue') return 'danger'     // 逾期未还 - 红色
+  return 'success'                              // 已归还 - 绿色
 }
 
 const getStatusText = (rental) => {
   const status = getStatusClass(rental)
-  if (status === 'active') return '借出中'
+  if (status === 'reserved') return '已预约'
+  if (status === 'borrowed') return '已借出'
   if (status === 'overdue') return '逾期未还'
   return '已归还'
 }
@@ -702,7 +724,7 @@ const toggleReturnMode = () => {
   returnMode.value = !returnMode.value
   
   if (returnMode.value) {
-    statusFilter.value = 'active,overdue'
+    statusFilter.value = 'borrowed,overdue'
     dateRange.value = null
   } else {
     statusFilter.value = ''

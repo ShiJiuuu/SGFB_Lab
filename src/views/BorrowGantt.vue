@@ -20,6 +20,10 @@
       />
       <div class="legend">
         <div class="legend-item">
+          <div class="legend-color status-reserved"></div>
+          <span>已预约</span>
+        </div>
+        <div class="legend-item">
           <div class="legend-color status-active"></div>
           <span>借出中</span>
         </div>
@@ -145,7 +149,7 @@ const allTasks = computed(() => {
   
   rentalRecords.value.forEach(rental => {
     const status = getStatusClass(rental)
-    const barColor = status === 'active' ? '#409eff' : status === 'overdue' ? '#f56c6c' : '#67c23a'
+    const barColor = status === 'reserved' ? '#ffc107' : status === 'borrowed' ? '#409eff' : status === 'overdue' ? '#f56c6c' : '#67c23a'
     
     if (rental.camara?.id) {
       tasks.push({
@@ -228,10 +232,11 @@ const isNow = (timeStr) => {
 
 const getStatusClass = (rental) => {
   const status = rental.status
-  if (status === 0) return 'active'
-  if (status === 1) return 'returned'
-  if (status === 2) return 'overdue'
-  return 'returned'
+  if (status === 0) return 'reserved'   // 已预约
+  if (status === 1) return 'returned'   // 已归还
+  if (status === 2) return 'overdue'    // 逾期未还
+  if (status === 3) return 'borrowed'   // 已借出
+  return 'reserved'
 }
 
 const previousDay = () => {
@@ -496,6 +501,10 @@ onMounted(() => {
   background-color: #409eff;
 }
 
+.task-bar.status-reserved {
+  background-color: #ffc107;
+}
+
 .task-bar.status-returned {
   background-color: #67c23a;
 }
@@ -528,6 +537,10 @@ onMounted(() => {
   width: 16px;
   height: 16px;
   border-radius: 3px;
+}
+
+.legend-color.status-reserved {
+  background-color: #ffc107;
 }
 
 .legend-color.status-active {

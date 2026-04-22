@@ -106,8 +106,10 @@ public class RentRecordController {
                 String[] statuses = status.split(",");
                 List<Integer> statusList = new ArrayList<>();
                 for (String s : statuses) {
-                    if ("active".equals(s)) {
+                    if ("reserved".equals(s)) {
                         statusList.add(0);
+                    } else if ("borrowed".equals(s)) {
+                        statusList.add(3);
                     } else if ("returned".equals(s)) {
                         statusList.add(1);
                     } else if ("overdue".equals(s)) {
@@ -118,8 +120,10 @@ public class RentRecordController {
                     wrapper.in(RentRecord::getStatus, statusList);
                 }
             } else {
-                if ("active".equals(status)) {
+                if ("reserved".equals(status)) {
                     wrapper.eq(RentRecord::getStatus, 0);
+                } else if ("borrowed".equals(status)) {
+                    wrapper.eq(RentRecord::getStatus, 3);
                 } else if ("returned".equals(status)) {
                     wrapper.eq(RentRecord::getStatus, 1);
                 } else if ("overdue".equals(status)) {
