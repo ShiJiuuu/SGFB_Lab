@@ -234,6 +234,8 @@ watch(() => props.modelValue, (newVal) => {
   border-radius: 8px;
   padding: 12px;
   width: 280px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .calendar-header {
@@ -360,13 +362,10 @@ watch(() => props.modelValue, (newVal) => {
   border-radius: 8px;
 }
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 1600px) {
   .picker-row {
     flex-direction: column;
-  }
-
-  .calendar-container {
-    width: 100%;
+    gap: 16px;
   }
 
   .time-grid {

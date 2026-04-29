@@ -38,7 +38,7 @@
       ref="borrowFormRef"
       :model="borrowForm"
       :rules="rules"
-      label-width="100px"
+      label-width="80px"
       class="borrow-form"
     >
       <el-divider content-position="left">
@@ -177,7 +177,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, computed } from 'vue'
+import { reactive, ref, onMounted, computed, watch } from 'vue'
 import { marked } from 'marked'
 import { ElMessage } from 'element-plus'
 import { Camera, User, Tickets, Phone, Setting, Calendar, Check, RefreshRight, CircleCheck, Bell } from '@element-plus/icons-vue'
@@ -362,6 +362,18 @@ const closeSuccessModal = () => {
   }
 }
 
+watch(() => borrowForm.borrowDate, () => {
+  if (borrowForm.borrowDate && borrowForm.returnDate) {
+    fetchDevices()
+  }
+})
+
+watch(() => borrowForm.returnDate, () => {
+  if (borrowForm.borrowDate && borrowForm.returnDate) {
+    fetchDevices()
+  }
+})
+
 onMounted(() => {
   fetch('http://127.0.0.1:7869/ingest/3985586e-a422-44df-a66f-e33b149f209b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'479e7b'},body:JSON.stringify({sessionId:'479e7b',id:'log_onmount_'+Date.now(),timestamp:Date.now(),location:'BorrowApplication.vue:364',message:'onMounted fired',data:{path:location.pathname},runId:'initial',hypothesisId:'E'})}).catch(()=>{});
   fetchDevices()
@@ -540,24 +552,36 @@ const openAnnounce = async () => {
   gap: 8px;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 1600px) {
   .borrow-application {
     padding: 20px 15px;
   }
-  
+
   .page-header {
     font-size: 18px;
     margin-bottom: 20px;
     padding-bottom: 15px;
   }
-  
+
   .header-icon {
     font-size: 22px;
   }
-  
+
   .button-group {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  :deep(.el-form-item__label) {
+    width: 80px !important;
+  }
+
+  :deep(.el-form-item__content) {
+    margin-left: 60px !important;
+  }
+
+  :deep(.el-select) {
+    width: 100% !important;
   }
 
   .success-modal-content {
