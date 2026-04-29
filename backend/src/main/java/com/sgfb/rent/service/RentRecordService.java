@@ -111,8 +111,12 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
             updateDeviceIfNeeded(record.getCamara(), 0);
             updateDeviceIfNeeded(record.getLens(), 0);
             updateDeviceIfNeeded(record.getOther(), 0);
+        } else if (newStatus == 2) {
+            // 订单变为"逾期未还" → 设备库存变为"逾期未还"
+            updateDeviceIfNeeded(record.getCamara(), 2);
+            updateDeviceIfNeeded(record.getLens(), 2);
+            updateDeviceIfNeeded(record.getOther(), 2);
         }
-        // 订单变为"逾期未还"(2)时不更改库存
     }
     
     private void updateDeviceIfNeeded(Integer deviceId, Integer targetStatus) {
@@ -132,6 +136,8 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
             return false;
         }
 
+        Integer oldStatus = existingRecord.getStatus();
+        
         existingRecord.setName(rentRecord.getName());
         existingRecord.setNum(rentRecord.getNum());
         existingRecord.setTel(rentRecord.getTel());
@@ -143,7 +149,13 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
         existingRecord.setStatus(rentRecord.getStatus());
         existingRecord.setRemark(rentRecord.getRemark());
 
-        return updateById(existingRecord);
+        boolean updated = updateById(existingRecord);
+        
+        if (updated && !oldStatus.equals(rentRecord.getStatus())) {
+            updateDeviceStatusForOrder(existingRecord, oldStatus, rentRecord.getStatus());
+        }
+        
+        return updated;
     }
 
     @Transactional
@@ -173,8 +185,8 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
         
         for (RentRecord record : borrowedRecords) {
             if (record.getRtuntime() != null && record.getRtuntime().isBefore(now)) {
-                record.setStatus(2);
-                updateById(record);
+                // 使用updateRentRecordStatus方法来确保设备状态同步更新
+                updateRentRecordStatus(record.getId(), 2);
             }
         }
     }
