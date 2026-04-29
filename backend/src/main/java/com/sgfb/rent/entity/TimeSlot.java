@@ -14,6 +14,8 @@ public class TimeSlot {
 
     private Integer dayOfWeek;
 
+    private Integer periodIndex;
+
     private LocalTime timeRangeStart;
 
     private LocalTime timeRangeEnd;
@@ -29,6 +31,9 @@ public class TimeSlot {
 
     public Integer getDayOfWeek() { return dayOfWeek; }
     public void setDayOfWeek(Integer dayOfWeek) { this.dayOfWeek = dayOfWeek; }
+
+    public Integer getPeriodIndex() { return periodIndex; }
+    public void setPeriodIndex(Integer periodIndex) { this.periodIndex = periodIndex; }
 
     public LocalTime getTimeRangeStart() { return timeRangeStart; }
     public void setTimeRangeStart(LocalTime timeRangeStart) { this.timeRangeStart = timeRangeStart; }

@@ -1,6 +1,7 @@
 package com.sgfb.rent.controller;
 
 import com.sgfb.rent.entity.TimeSlot;
+import com.sgfb.rent.mapper.TimeSlotMapper;
 import com.sgfb.rent.service.TimeSlotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,9 @@ public class TimeSlotController {
 
     @Autowired
     private TimeSlotService timeSlotService;
+
+    @Autowired
+    private TimeSlotMapper timeSlotMapper;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllSlots() {
@@ -37,10 +41,10 @@ public class TimeSlotController {
 
     @GetMapping("/day/{dayOfWeek}")
     public ResponseEntity<Map<String, Object>> getSlotByDayOfWeek(@PathVariable int dayOfWeek) {
-        TimeSlot slot = timeSlotService.getSlotByDayOfWeek(dayOfWeek);
+        List<TimeSlot> slots = timeSlotMapper.selectByDayOfWeek(dayOfWeek);
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
-        result.put("data", slot);
+        result.put("data", slots);
         return ResponseEntity.ok(result);
     }
 
@@ -55,21 +59,7 @@ public class TimeSlotController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> saveSlot(@RequestBody TimeSlot timeSlot) {
-        TimeSlot existing = timeSlotService.getSlotByDayOfWeek(timeSlot.getDayOfWeek());
-
-        if (existing != null) {
-            existing.setTimeRangeStart(timeSlot.getTimeRangeStart());
-            existing.setTimeRangeEnd(timeSlot.getTimeRangeEnd());
-            existing.setEnabled(timeSlot.getEnabled());
-            boolean updated = timeSlotService.updateById(existing);
-
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", updated);
-            result.put("message", updated ? "更新成功" : "更新失败");
-            return ResponseEntity.ok(result);
-        }
-
-        boolean saved = timeSlotService.save(timeSlot);
+        boolean saved = timeSlotService.saveSlot(timeSlot);
         Map<String, Object> result = new HashMap<>();
         result.put("success", saved);
         result.put("message", saved ? "保存成功" : "保存失败");

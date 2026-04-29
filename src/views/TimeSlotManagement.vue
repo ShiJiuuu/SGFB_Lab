@@ -12,63 +12,69 @@
 
       <div class="slot-grid">
         <div
-          v-for="slot in slots"
-          :key="slot.dayOfWeek"
+          v-for="day in slots"
+          :key="day.dayOfWeek"
           class="slot-card"
-          :class="{ 'disabled': slot.enabled === 0 }"
         >
           <div class="slot-header">
-            <span class="day-label">{{ slot.dayOfWeekName }}</span>
-            <el-switch
-              v-model="slot.enabled"
-              :active-value="1"
-              :inactive-value="0"
-              size="small"
-            />
+            <span class="day-label">{{ day.name }}</span>
           </div>
 
-          <div class="slot-body" v-if="slot.enabled === 1">
-            <div class="time-range">
-              <div class="time-input-group">
-                <span class="time-label">开始</span>
-                <el-time-select
-                  v-model="slot.startStr"
-                  placeholder="开始时间"
-                  start="00:00"
-                  step="00:05"
-                  end="23:55"
-                  style="width: 130px"
+          <div class="period-list">
+            <div
+              v-for="period in day.periods"
+              :key="period.periodIndex"
+              class="period-row"
+              :class="{ 'disabled-row': !period.enabled }"
+            >
+              <div class="period-header">
+                <el-switch
+                  v-model="period.enabled"
                   size="small"
                 />
+                <span class="period-label">{{ periodLabels[period.periodIndex] }}</span>
               </div>
-              <div class="time-input-group">
-                <span class="time-label">结束</span>
-                <el-time-select
-                  v-model="slot.endStr"
-                  placeholder="结束时间"
-                  start="00:00"
-                  step="00:05"
-                  end="23:55"
-                  style="width: 130px"
+
+              <div class="slot-body" v-if="period.enabled">
+                <div class="time-range">
+                  <div class="time-input-group">
+                    <span class="time-label">开始</span>
+                    <el-time-select
+                      v-model="period.startStr"
+                      placeholder="开始时间"
+                      start="00:00"
+                      step="00:05"
+                      end="23:55"
+                      style="width: 120px"
+                      size="small"
+                    />
+                  </div>
+                  <div class="time-input-group">
+                    <span class="time-label">结束</span>
+                    <el-time-select
+                      v-model="period.endStr"
+                      placeholder="结束时间"
+                      start="00:00"
+                      step="00:05"
+                      end="23:55"
+                      style="width: 120px"
+                      size="small"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="period-footer">
+                <el-button
+                  type="primary"
                   size="small"
-                />
+                  @click="handleSave(day.dayOfWeek, period.periodIndex, period)"
+                  :loading="period.saving"
+                >
+                  保存
+                </el-button>
               </div>
             </div>
-          </div>
-
-          <div class="slot-disabled-text" v-else>
-            <span>已禁用</span>
-          </div>
-
-          <div class="slot-footer">
-            <el-button
-              type="primary"
-              size="small"
-              @click="handleSave(slot)"
-              :loading="slot.saving"
-            >
-              保存
-            </el-button>
           </div>
         </div>
       </div>
@@ -84,6 +90,7 @@ import { Clock } from '@element-plus/icons-vue'
 const slots = ref([])
 
 const dayNames = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日']
+const periodLabels = ['上午', '下午']
 
 onMounted(() => {
   fetchSlots()
@@ -94,12 +101,29 @@ async function fetchSlots() {
     const response = await fetch('/api/time-slots')
     const result = await response.json()
     if (result.success && result.data) {
-      slots.value = result.data.map(s => ({
-        ...s,
-        startStr: s.timeRangeStart ? s.timeRangeStart.substring(0, 5) : '',
-        endStr: s.timeRangeEnd ? s.timeRangeEnd.substring(0, 5) : '',
-        saving: false
-      }))
+      const grouped = {}
+      for (let i = 1; i <= 7; i++) grouped[i] = []
+
+      result.data.forEach(s => {
+        if (grouped[s.dayOfWeek]) grouped[s.dayOfWeek].push(s)
+      })
+
+      slots.value = dayNames.slice(1).map((name, idx) => {
+        const dayOfWeek = idx + 1
+        const periods = [0, 1].map(pi => {
+          const found = grouped[dayOfWeek].find(s => s.periodIndex === pi)
+          return {
+            id: found ? found.id : null,
+            dayOfWeek,
+            periodIndex: pi,
+            enabled: found ? (found.enabled === 1) : false,
+            startStr: found && found.timeRangeStart ? found.timeRangeStart.substring(0, 5) : '',
+            endStr: found && found.timeRangeEnd ? found.timeRangeEnd.substring(0, 5) : '',
+            saving: false
+          }
+        })
+        return { dayOfWeek, name, periods }
+      })
     }
   } catch (e) {
     console.error('获取时间配置失败', e)
@@ -107,27 +131,30 @@ async function fetchSlots() {
   }
 }
 
-async function handleSave(slot) {
-  if (!slot.startStr || !slot.endStr) {
+async function handleSave(dayOfWeek, periodIndex, period) {
+  if (period.enabled && (!period.startStr || !period.endStr)) {
     ElMessage.warning('请填写完整的开始和结束时间')
     return
   }
 
-  slot.saving = true
+  period.saving = true
   try {
     const response = await fetch('/api/time-slots', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        dayOfWeek: slot.dayOfWeek,
-        timeRangeStart: slot.startStr + ':00',
-        timeRangeEnd: slot.endStr + ':00',
-        enabled: slot.enabled
+        id: period.id,
+        dayOfWeek: dayOfWeek,
+        periodIndex,
+        timeRangeStart: period.startStr ? period.startStr + ':00' : null,
+        timeRangeEnd: period.endStr ? period.endStr + ':00' : null,
+        enabled: period.enabled ? 1 : 0
       })
     })
     const result = await response.json()
     if (result.success) {
-      ElMessage.success(`${slot.dayOfWeekName} 保存成功`)
+      ElMessage.success(`${dayNames[dayOfWeek]} ${periodLabels[periodIndex]} 保存成功`)
+      fetchSlots()
     } else {
       ElMessage.error(result.message || '保存失败')
     }
@@ -135,7 +162,7 @@ async function handleSave(slot) {
     console.error('保存失败', e)
     ElMessage.error('保存失败')
   } finally {
-    slot.saving = false
+    period.saving = false
   }
 }
 </script>
@@ -192,8 +219,38 @@ async function handleSave(slot) {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.slot-card.disabled {
-  opacity: 0.65;
+.period-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.period-row {
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  padding: 10px;
+  transition: all 0.2s;
+}
+
+.period-row:hover {
+  background: #fafafa;
+}
+
+.period-row.disabled-row {
+  opacity: 0.55;
+}
+
+.period-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.period-label {
+  font-size: 13px;
+  color: #606266;
+  font-weight: 500;
 }
 
 .slot-header {
@@ -231,17 +288,10 @@ async function handleSave(slot) {
   width: 36px;
 }
 
-.slot-disabled-text {
-  text-align: center;
-  color: #c0c4cc;
-  font-size: 14px;
-  padding: 12px 0;
-  margin-bottom: 10px;
-}
-
-.slot-footer {
+.period-footer {
   display: flex;
   justify-content: flex-end;
+  margin-top: 8px;
 }
 
 @media screen and (max-width: 768px) {

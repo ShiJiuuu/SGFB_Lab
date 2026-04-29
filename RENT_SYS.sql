@@ -133,24 +133,39 @@ DROP TABLE IF EXISTS `TIME_SLOT`;
 CREATE TABLE `TIME_SLOT` (
   `id` int NOT NULL AUTO_INCREMENT,
   `day_of_week` tinyint NOT NULL COMMENT '星期几：1=周一，2=周二...7=周日',
+  `period_index` tinyint NOT NULL DEFAULT 0 COMMENT '时间段索引：0=第一段，1=第二段',
   `time_range_start` time NOT NULL COMMENT '当日可预约开始时间（如 09:00:00）',
   `time_range_end` time NOT NULL COMMENT '当日可预约结束时间（如 18:00:00）',
   `enabled` tinyint NOT NULL DEFAULT 1 COMMENT '是否启用：0=禁用，1=启用',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_day` (`day_of_week`)
+  UNIQUE KEY `uk_day_period` (`day_of_week`, `period_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='预约时间段配置表';
 
 -- ----------------------------
--- Records of TIME_SLOT
+-- Records of TIME_SLOT (周一~周五: 上午+下午, 周六~周日: 仅上午)
 -- ----------------------------
 BEGIN;
-INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (1, '09:00:00', '18:00:00', 1);
-INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (2, '09:00:00', '18:00:00', 1);
-INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (3, '09:00:00', '18:00:00', 1);
-INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (4, '09:00:00', '18:00:00', 1);
-INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (5, '09:00:00', '18:00:00', 1);
-INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (6, '09:00:00', '12:00:00', 1);
-INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (7, '09:00:00', '12:00:00', 1);
+-- 周一
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (1, 0, '09:00:00', '12:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (1, 1, '14:00:00', '18:00:00', 1);
+-- 周二
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (2, 0, '09:00:00', '12:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (2, 1, '14:00:00', '18:00:00', 1);
+-- 周三
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (3, 0, '09:00:00', '12:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (3, 1, '14:00:00', '18:00:00', 1);
+-- 周四
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (4, 0, '09:00:00', '12:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (4, 1, '14:00:00', '18:00:00', 1);
+-- 周五
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (5, 0, '09:00:00', '12:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (5, 1, '14:00:00', '18:00:00', 1);
+-- 周六
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (6, 0, '09:00:00', '12:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (6, 1, '09:00:00', '12:00:00', 0);
+-- 周日
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (7, 0, '09:00:00', '12:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `period_index`, `time_range_start`, `time_range_end`, `enabled`) VALUES (7, 1, '09:00:00', '12:00:00', 0);
 COMMIT;

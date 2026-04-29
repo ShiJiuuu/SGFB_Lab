@@ -9,6 +9,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Service
 public class TimeSlotService extends ServiceImpl<TimeSlotMapper, TimeSlot> {
@@ -35,27 +37,26 @@ public class TimeSlotService extends ServiceImpl<TimeSlotMapper, TimeSlot> {
     }
 
     public List<String> generateTimePoints(int dayOfWeek) {
-        TimeSlot slot = getSlotByDayOfWeek(dayOfWeek);
-        if (slot == null || slot.getEnabled() == 0) {
-            return new ArrayList<>();
+        List<TimeSlot> slots = baseMapper.selectByDayOfWeek(dayOfWeek);
+        Set<String> pointSet = new TreeSet<>();
+
+        for (TimeSlot slot : slots) {
+            if (slot.getEnabled() == null || slot.getEnabled() == 0) {
+                continue;
+            }
+            LocalTime start = slot.getTimeRangeStart();
+            LocalTime end = slot.getTimeRangeEnd();
+            if (start == null || end == null || !start.isBefore(end)) {
+                continue;
+            }
+            LocalTime current = start.withMinute((start.getMinute() / 5) * 5).withSecond(0);
+            while (!current.isAfter(end)) {
+                pointSet.add(current.format(TIME_FORMATTER));
+                current = current.plusMinutes(5);
+            }
         }
 
-        LocalTime start = slot.getTimeRangeStart();
-        LocalTime end = slot.getTimeRangeEnd();
-
-        if (start == null || end == null || !start.isBefore(end)) {
-            return new ArrayList<>();
-        }
-
-        List<String> points = new ArrayList<>();
-        LocalTime current = start.withMinute((start.getMinute() / 5) * 5).withSecond(0);
-
-        while (!current.isAfter(end)) {
-            points.add(current.format(TIME_FORMATTER));
-            current = current.plusMinutes(5);
-        }
-
-        return points;
+        return new ArrayList<>(pointSet);
     }
 
     public boolean saveSlot(TimeSlot timeSlot) {
@@ -63,6 +64,7 @@ public class TimeSlotService extends ServiceImpl<TimeSlotMapper, TimeSlot> {
             TimeSlot existing = getById(timeSlot.getId());
             if (existing != null) {
                 existing.setDayOfWeek(timeSlot.getDayOfWeek());
+                existing.setPeriodIndex(timeSlot.getPeriodIndex());
                 existing.setTimeRangeStart(timeSlot.getTimeRangeStart());
                 existing.setTimeRangeEnd(timeSlot.getTimeRangeEnd());
                 existing.setEnabled(timeSlot.getEnabled());
@@ -72,6 +74,7 @@ public class TimeSlotService extends ServiceImpl<TimeSlotMapper, TimeSlot> {
 
         LambdaQueryWrapper<TimeSlot> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(TimeSlot::getDayOfWeek, timeSlot.getDayOfWeek());
+        wrapper.eq(TimeSlot::getPeriodIndex, timeSlot.getPeriodIndex());
         TimeSlot existing = getOne(wrapper);
 
         if (existing != null) {
