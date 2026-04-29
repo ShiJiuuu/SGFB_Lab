@@ -3,6 +3,10 @@
     <div class="page-header">
       <el-icon class="header-icon"><Camera /></el-icon>
       <span>预约申请</span>
+      <el-button type="primary" size="default" @click="openAnnounce" class="announce-btn">
+  <el-icon><Bell /></el-icon>
+  公告
+</el-button>
     </div>
 
     <el-dialog 
@@ -197,7 +201,8 @@ import {
   Document,
   Check,
   RefreshRight,
-  CircleCheck
+  CircleCheck,
+  Bell
 } from '@element-plus/icons-vue'
 
 const borrowFormRef = ref()
@@ -451,6 +456,22 @@ const fetchAnnounce = async () => {
 const closeAnnounce = () => {
   announceVisible.value = false
 }
+
+const openAnnounce = async () => {
+  try {
+    const response = await fetch('/api/announce')
+    const data = await response.json()
+    if (data.success && data.data) {
+      announceContent.value = data.data
+      announceVisible.value = true
+    } else {
+      ElMessage.info('暂无公告')
+    }
+  } catch (error) {
+    console.error('获取公告失败:', error)
+    ElMessage.error('获取公告失败')
+  }
+}
 </script>
 
 <style scoped>
@@ -484,6 +505,23 @@ const closeAnnounce = () => {
 .header-icon {
   font-size: 26px;
   color: #409eff;
+}
+
+.announce-btn {
+  margin-left: auto;
+  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  border: none;
+  box-shadow: 0 3px 6px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s ease;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.announce-btn:hover {
+  background: linear-gradient(135deg, #66b1ff 0%, #409eff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
 }
 
 .borrow-form {
