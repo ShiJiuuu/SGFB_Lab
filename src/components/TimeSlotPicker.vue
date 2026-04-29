@@ -5,9 +5,9 @@
         <div class="section-label">{{ label }}</div>
         <div class="calendar-container">
           <div class="calendar-header">
-            <button class="nav-btn" @click="prevMonth">&lt;</button>
+            <button type="button" class="nav-btn" @click="prevMonth">&lt;</button>
             <span class="month-label">{{ monthLabel }}</span>
-            <button class="nav-btn" @click="nextMonth">&gt;</button>
+            <button type="button" class="nav-btn" @click="nextMonth">&gt;</button>
           </div>
           <div class="calendar-weekdays">
             <span v-for="d in weekdays" :key="d">{{ d }}</span>
