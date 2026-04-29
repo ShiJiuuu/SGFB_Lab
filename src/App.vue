@@ -26,6 +26,10 @@
           <el-icon><Tools /></el-icon>
           <span>设备管理</span>
         </el-menu-item>
+        <el-menu-item index="/time-slot-management">
+          <el-icon><Clock /></el-icon>
+          <span>预约时间管理</span>
+        </el-menu-item>
       </el-menu>
       <div class="footer">
         <span>Developed By Kirbyuuu</span>
@@ -81,6 +85,10 @@
           <el-icon><Tools /></el-icon>
           <span>设备管理</span>
         </el-menu-item>
+        <el-menu-item index="/time-slot-management">
+          <el-icon><Clock /></el-icon>
+          <span>预约时间管理</span>
+        </el-menu-item>
       </el-menu>
       <div class="footer mobile-footer">
         <span>Developed By Kirbyuuu</span>
@@ -96,7 +104,7 @@
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Menu, Document, DataLine, Tools, List } from '@element-plus/icons-vue'
+import { Menu, Document, DataLine, Tools, List, Clock } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()

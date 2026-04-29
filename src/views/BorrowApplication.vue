@@ -83,32 +83,21 @@
         <el-icon><Calendar /></el-icon>
         预约时间
       </el-divider>
-      
+
       <el-row :gutter="20">
         <el-col :xs="24" :sm="12" :span="12">
-          <el-form-item label="预约时间" prop="borrowDate">
-            <el-date-picker
+          <el-form-item prop="borrowDate">
+            <TimeSlotPicker
               v-model="borrowForm.borrowDate"
-              type="datetime"
-              placeholder="选择预约时间"
-              style="width: 100%"
-              format="YYYY-MM-DD HH:mm"
-              value-format="YYYY-MM-DD HH:mm"
-              :disabled-date="disabledDate"
-              :disabled-hours="disabledHours"
-              :disabled-minutes="disabledMinutes"
+              label="预约时间"
             />
           </el-form-item>
         </el-col>
         <el-col :xs="24" :sm="12" :span="12">
-          <el-form-item label="归还时间" prop="returnDate">
-            <el-date-picker
+          <el-form-item prop="returnDate">
+            <TimeSlotPicker
               v-model="borrowForm.returnDate"
-              type="datetime"
-              placeholder="选择归还时间"
-              style="width: 100%"
-              format="YYYY-MM-DD HH:mm"
-              value-format="YYYY-MM-DD HH:mm"
+              label="归还时间"
             />
           </el-form-item>
         </el-col>
@@ -188,22 +177,11 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, watch, computed } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import { marked } from 'marked'
 import { ElMessage } from 'element-plus'
-import { 
-  Camera, 
-  User, 
-  Tickets, 
-  Phone, 
-  Setting, 
-  Calendar, 
-  Document,
-  Check,
-  RefreshRight,
-  CircleCheck,
-  Bell
-} from '@element-plus/icons-vue'
+import { Camera, User, Tickets, Phone, Setting, Calendar, Check, RefreshRight, CircleCheck, Bell } from '@element-plus/icons-vue'
+import TimeSlotPicker from '../components/TimeSlotPicker.vue'
 
 const borrowFormRef = ref()
 const loading = ref(false)
@@ -235,13 +213,7 @@ const validateBorrowDate = (rule, value, callback) => {
   if (!value) {
     callback(new Error('请选择预约时间'))
   } else {
-    const now = new Date()
-    now.setSeconds(0, 0)
-    if (new Date(value) < now) {
-      callback(new Error('预约时间不能早于当前时间'))
-    } else {
-      callback()
-    }
+    callback()
   }
 }
 
@@ -253,40 +225,6 @@ const validateReturnDate = (rule, value, callback) => {
   } else {
     callback()
   }
-}
-
-const disabledDate = (time) => {
-  return time.getTime() < Date.now() - 8.64e7
-}
-
-const disabledHours = () => {
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const borrowDate = borrowForm.borrowDate ? new Date(borrowForm.borrowDate) : null
-  
-  if (borrowDate && borrowDate.getFullYear() === today.getFullYear() && borrowDate.getMonth() === today.getMonth() && borrowDate.getDate() === today.getDate()) {
-    const hours = []
-    for (let i = 0; i < now.getHours(); i++) {
-      hours.push(i)
-    }
-    return hours
-  }
-  return []
-}
-
-const disabledMinutes = (selectedHour) => {
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const borrowDate = borrowForm.borrowDate ? new Date(borrowForm.borrowDate) : null
-  
-  if (borrowDate && borrowDate.getFullYear() === today.getFullYear() && borrowDate.getMonth() === today.getMonth() && borrowDate.getDate() === today.getDate() && selectedHour === now.getHours()) {
-    const minutes = []
-    for (let i = 0; i < now.getMinutes(); i++) {
-      minutes.push(i)
-    }
-    return minutes
-  }
-  return []
 }
 
 const rules = {
@@ -301,14 +239,15 @@ const rules = {
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
   ],
   borrowDate: [
-    { required: true, validator: validateBorrowDate, trigger: 'change' }
+    { required: true, validator: validateBorrowDate, trigger: 'blur' }
   ],
   returnDate: [
-    { required: true, validator: validateReturnDate, trigger: 'change' }
+    { required: true, validator: validateReturnDate, trigger: 'blur' }
   ]
 }
 
 const fetchDevices = async () => {
+  fetch('http://127.0.0.1:7869/ingest/3985586e-a422-44df-a66f-e33b149f209b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'479e7b'},body:JSON.stringify({sessionId:'479e7b',id:'log_fetchdev_'+Date.now(),timestamp:Date.now(),location:'BorrowApplication.vue:249',message:'fetchDevices called',data:{borrowDate:borrowForm.borrowDate,returnDate:borrowForm.returnDate,selectedCamera:borrowForm.camera,selectedLens:borrowForm.lens,selectedOther:borrowForm.other,cameraListLen:cameraList.value.length},runId:'initial',hypothesisId:'E'})}).catch(()=>{});
   try {
     if (borrowForm.borrowDate && borrowForm.returnDate) {
       const url = `/api/devices/available?borrowTime=${encodeURIComponent(borrowForm.borrowDate)}&returnTime=${encodeURIComponent(borrowForm.returnDate)}`
@@ -423,19 +362,8 @@ const closeSuccessModal = () => {
   }
 }
 
-watch([() => borrowForm.borrowDate, () => borrowForm.returnDate], ([newBorrow, newReturn]) => {
-  if (newBorrow) {
-    borrowFormRef.value.validateField('borrowDate')
-  }
-  if (borrowForm.returnDate) {
-    borrowFormRef.value.validateField('returnDate')
-  }
-  if (newBorrow && newReturn) {
-    fetchDevices()
-  }
-})
-
 onMounted(() => {
+  fetch('http://127.0.0.1:7869/ingest/3985586e-a422-44df-a66f-e33b149f209b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'479e7b'},body:JSON.stringify({sessionId:'479e7b',id:'log_onmount_'+Date.now(),timestamp:Date.now(),location:'BorrowApplication.vue:364',message:'onMounted fired',data:{path:location.pathname},runId:'initial',hypothesisId:'E'})}).catch(()=>{});
   fetchDevices()
   fetchAnnounce()
 })

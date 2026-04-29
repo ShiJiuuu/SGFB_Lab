@@ -125,3 +125,32 @@ INSERT INTO `USER_SYS` (`id`, `USERNAME`, `PASSWORD`) VALUES (3, 'shijiu', 'shij
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ----------------------------
+-- Table structure for TIME_SLOT
+-- ----------------------------
+DROP TABLE IF EXISTS `TIME_SLOT`;
+CREATE TABLE `TIME_SLOT` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `day_of_week` tinyint NOT NULL COMMENT '星期几：1=周一，2=周二...7=周日',
+  `time_range_start` time NOT NULL COMMENT '当日可预约开始时间（如 09:00:00）',
+  `time_range_end` time NOT NULL COMMENT '当日可预约结束时间（如 18:00:00）',
+  `enabled` tinyint NOT NULL DEFAULT 1 COMMENT '是否启用：0=禁用，1=启用',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_day` (`day_of_week`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='预约时间段配置表';
+
+-- ----------------------------
+-- Records of TIME_SLOT
+-- ----------------------------
+BEGIN;
+INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (1, '09:00:00', '18:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (2, '09:00:00', '18:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (3, '09:00:00', '18:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (4, '09:00:00', '18:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (5, '09:00:00', '18:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (6, '09:00:00', '12:00:00', 1);
+INSERT INTO `TIME_SLOT` (`day_of_week`, `time_range_start`, `time_range_end`, `enabled`) VALUES (7, '09:00:00', '12:00:00', 1);
+COMMIT;

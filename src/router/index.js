@@ -3,6 +3,7 @@ import BorrowApplication from '../views/BorrowApplication.vue'
 import BorrowGantt from '../views/BorrowGantt.vue'
 import EquipmentManagement from '../views/EquipmentManagement.vue'
 import RentDetails from '../views/RentDetails.vue'
+import TimeSlotManagement from '../views/TimeSlotManagement.vue'
 import Login from '../views/Login.vue'
 
 const routes = [
@@ -11,7 +12,8 @@ const routes = [
   { path: '/borrow-application', name: 'BorrowApplication', component: BorrowApplication },
   { path: '/borrow-gantt', name: 'BorrowGantt', component: BorrowGantt },
   { path: '/equipment-management', name: 'EquipmentManagement', component: EquipmentManagement, meta: { requiresAuth: true } },
-  { path: '/rent-details', name: 'RentDetails', component: RentDetails, meta: { requiresAuth: true } }
+  { path: '/rent-details', name: 'RentDetails', component: RentDetails, meta: { requiresAuth: true } },
+  { path: '/time-slot-management', name: 'TimeSlotManagement', component: TimeSlotManagement, meta: { requiresAuth: true } }
 ]
 
 const router = createRouter({
