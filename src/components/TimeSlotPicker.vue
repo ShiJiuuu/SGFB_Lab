@@ -174,7 +174,6 @@ async function selectDate(day) {
 }
 
 function selectTime(point) {
-  fetch('http://127.0.0.1:7869/ingest/3985586e-a422-44df-a66f-e33b149f209b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'479e7b'},body:JSON.stringify({sessionId:'479e7b',id:'log_sel_'+Date.now(),timestamp:Date.now(),location:'TimeSlotPicker.vue:175',message:'selectTime called',data:{point:point,selectedDate:selectedDate.value,modelValue:props.modelValue},runId:'initial',hypothesisId:'E'})}).catch(()=>{});
   const year = selectedDate.value.getFullYear()
   const month = String(selectedDate.value.getMonth() + 1).padStart(2, '0')
   const day = String(selectedDate.value.getDate()).padStart(2, '0')
@@ -183,7 +182,6 @@ function selectTime(point) {
 }
 
 watch(() => props.modelValue, (newVal) => {
-  fetch('http://127.0.0.1:7869/ingest/3985586e-a422-44df-a66f-e33b149f209b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'479e7b'},body:JSON.stringify({sessionId:'479e7b',id:'log_watchmv_'+Date.now(),timestamp:Date.now(),location:'TimeSlotPicker.vue:183',message:'modelValue watch fired',data:{newVal:newVal,selectedDateNull:!selectedDate.value},runId:'initial',hypothesisId:'E'})}).catch(()=>{});
   if (!newVal && selectedDate.value) {
     selectedDate.value = null
     timePoints.value = []

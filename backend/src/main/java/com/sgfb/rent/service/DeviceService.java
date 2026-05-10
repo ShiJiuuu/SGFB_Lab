@@ -45,7 +45,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
         }
         
         LambdaQueryWrapper<RentRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(RentRecord::getStatus, 0);
+        wrapper.in(RentRecord::getStatus, 0, 2, 3);
         List<RentRecord> activeRecords = rentRecordMapper.selectList(wrapper);
         List<Integer> occupiedDeviceIds = new ArrayList<>();
         
@@ -68,7 +68,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
         }
         
         LambdaQueryWrapper<RentRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(RentRecord::getStatus, 0);
+        wrapper.in(RentRecord::getStatus, 0, 2, 3);
         List<RentRecord> activeRecords = rentRecordMapper.selectList(wrapper);
         
         for (RentRecord record : activeRecords) {
@@ -102,7 +102,7 @@ public class DeviceService extends ServiceImpl<DeviceMapper, Device> {
             return false;
         }
         LambdaQueryWrapper<RentRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(RentRecord::getStatus, 0);
+        wrapper.in(RentRecord::getStatus, 0, 2, 3);
         List<RentRecord> activeRecords = rentRecordMapper.selectList(wrapper);
         
         for (RentRecord record : activeRecords) {

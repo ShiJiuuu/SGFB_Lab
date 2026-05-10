@@ -235,8 +235,8 @@ const rules = {
     { required: true, message: '请输入学号', trigger: 'blur' }
   ],
   phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+    // { required: true, message: '请输入手机号', trigger: 'blur' },
+    // { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
   ],
   borrowDate: [
     { required: true, validator: validateBorrowDate, trigger: 'blur' }
@@ -247,7 +247,6 @@ const rules = {
 }
 
 const fetchDevices = async () => {
-  fetch('http://127.0.0.1:7869/ingest/3985586e-a422-44df-a66f-e33b149f209b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'479e7b'},body:JSON.stringify({sessionId:'479e7b',id:'log_fetchdev_'+Date.now(),timestamp:Date.now(),location:'BorrowApplication.vue:249',message:'fetchDevices called',data:{borrowDate:borrowForm.borrowDate,returnDate:borrowForm.returnDate,selectedCamera:borrowForm.camera,selectedLens:borrowForm.lens,selectedOther:borrowForm.other,cameraListLen:cameraList.value.length},runId:'initial',hypothesisId:'E'})}).catch(()=>{});
   try {
     if (borrowForm.borrowDate && borrowForm.returnDate) {
       const url = `/api/devices/available?borrowTime=${encodeURIComponent(borrowForm.borrowDate)}&returnTime=${encodeURIComponent(borrowForm.returnDate)}`
@@ -375,7 +374,6 @@ watch(() => borrowForm.returnDate, () => {
 })
 
 onMounted(() => {
-  fetch('http://127.0.0.1:7869/ingest/3985586e-a422-44df-a66f-e33b149f209b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'479e7b'},body:JSON.stringify({sessionId:'479e7b',id:'log_onmount_'+Date.now(),timestamp:Date.now(),location:'BorrowApplication.vue:364',message:'onMounted fired',data:{path:location.pathname},runId:'initial',hypothesisId:'E'})}).catch(()=>{});
   fetchDevices()
   fetchAnnounce()
 })
