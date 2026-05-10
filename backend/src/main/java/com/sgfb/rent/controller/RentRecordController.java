@@ -114,6 +114,8 @@ public class RentRecordController {
                         statusList.add(1);
                     } else if ("overdue".equals(s)) {
                         statusList.add(2);
+                    } else if ("unpicked".equals(s)) {
+                        statusList.add(4);
                     }
                 }
                 if (!statusList.isEmpty()) {
@@ -128,6 +130,8 @@ public class RentRecordController {
                     wrapper.eq(RentRecord::getStatus, 1);
                 } else if ("overdue".equals(status)) {
                     wrapper.eq(RentRecord::getStatus, 2);
+                } else if ("unpicked".equals(status)) {
+                    wrapper.eq(RentRecord::getStatus, 4);
                 }
             }
         }

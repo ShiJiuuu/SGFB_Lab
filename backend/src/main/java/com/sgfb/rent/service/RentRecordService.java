@@ -106,8 +106,8 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
             updateDeviceIfNeeded(record.getCamara(), 1);
             updateDeviceIfNeeded(record.getLens(), 1);
             updateDeviceIfNeeded(record.getOther(), 1);
-        } else if (newStatus == 1) {
-            // 订单变为"已归还" → 设备库存恢复为"正常库存"
+        } else if (newStatus == 1 || newStatus == 4) {
+            // 订单变为"已归还"或"预约未取" → 设备库存恢复为"正常库存"
             updateDeviceIfNeeded(record.getCamara(), 0);
             updateDeviceIfNeeded(record.getLens(), 0);
             updateDeviceIfNeeded(record.getOther(), 0);
@@ -137,6 +137,9 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
         }
 
         Integer oldStatus = existingRecord.getStatus();
+        Integer oldCamara = existingRecord.getCamara();
+        Integer oldLens = existingRecord.getLens();
+        Integer oldOther = existingRecord.getOther();
         
         existingRecord.setName(rentRecord.getName());
         existingRecord.setNum(rentRecord.getNum());
@@ -151,11 +154,48 @@ public class RentRecordService extends ServiceImpl<RentRecordMapper, RentRecord>
 
         boolean updated = updateById(existingRecord);
         
-        if (updated && !oldStatus.equals(rentRecord.getStatus())) {
-            updateDeviceStatusForOrder(existingRecord, oldStatus, rentRecord.getStatus());
+        if (updated) {
+            if (!oldStatus.equals(rentRecord.getStatus())) {
+                updateDeviceStatusForOrder(existingRecord, oldStatus, rentRecord.getStatus());
+            } else {
+                handleDeviceChanges(oldCamara, oldLens, oldOther, 
+                                   rentRecord.getCamara(), rentRecord.getLens(), rentRecord.getOther(), 
+                                   rentRecord.getStatus());
+            }
         }
         
         return updated;
+    }
+
+    private void handleDeviceChanges(Integer oldCamara, Integer oldLens, Integer oldOther,
+                                     Integer newCamara, Integer newLens, Integer newOther,
+                                     Integer orderStatus) {
+        if (oldCamara == null && newCamara != null) {
+            updateDeviceIfNeeded(newCamara, getDeviceStatusForOrderStatus(orderStatus));
+        } else if (oldCamara != null && newCamara == null) {
+            updateDeviceIfNeeded(oldCamara, 0);
+        }
+        
+        if (oldLens == null && newLens != null) {
+            updateDeviceIfNeeded(newLens, getDeviceStatusForOrderStatus(orderStatus));
+        } else if (oldLens != null && newLens == null) {
+            updateDeviceIfNeeded(oldLens, 0);
+        }
+        
+        if (oldOther == null && newOther != null) {
+            updateDeviceIfNeeded(newOther, getDeviceStatusForOrderStatus(orderStatus));
+        } else if (oldOther != null && newOther == null) {
+            updateDeviceIfNeeded(oldOther, 0);
+        }
+    }
+
+    private Integer getDeviceStatusForOrderStatus(Integer orderStatus) {
+        if (orderStatus == 0 || orderStatus == 3) {
+            return 1;
+        } else if (orderStatus == 2) {
+            return 2;
+        }
+        return 0;
     }
 
     @Transactional
