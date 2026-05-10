@@ -220,8 +220,6 @@ const validateBorrowDate = (rule, value, callback) => {
 const validateReturnDate = (rule, value, callback) => {
   if (!value) {
     callback(new Error('请选择归还时间'))
-  } else if (borrowForm.borrowDate && new Date(value) <= new Date(borrowForm.borrowDate)) {
-    callback(new Error('归还时间必须晚于预约时间'))
   } else {
     callback()
   }

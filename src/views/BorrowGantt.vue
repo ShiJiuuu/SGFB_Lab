@@ -35,6 +35,10 @@
           <div class="legend-color status-overdue"></div>
           <span>逾期未还</span>
         </div>
+        <div class="legend-item">
+          <div class="legend-color status-unpicked"></div>
+          <span>预约未取</span>
+        </div>
       </div>
     </div>
     
@@ -149,7 +153,11 @@ const allTasks = computed(() => {
   
   rentalRecords.value.forEach(rental => {
     const status = getStatusClass(rental)
-    const barColor = status === 'reserved' ? '#ffc107' : status === 'borrowed' ? '#409eff' : status === 'overdue' ? '#f56c6c' : '#67c23a'
+    let barColor = '#67c23a'
+    if (status === 'reserved') barColor = '#ffc107'
+    else if (status === 'borrowed') barColor = '#409eff'
+    else if (status === 'overdue') barColor = '#f56c6c'
+    else if (status === 'unpicked') barColor = '#909399'
     
     if (rental.camara?.id) {
       tasks.push({
@@ -236,6 +244,7 @@ const getStatusClass = (rental) => {
   if (status === 1) return 'returned'   // 已归还
   if (status === 2) return 'overdue'    // 逾期未还
   if (status === 3) return 'borrowed'   // 已借出
+  if (status === 4) return 'unpicked'   // 预约未取
   return 'reserved'
 }
 
@@ -513,6 +522,10 @@ onMounted(() => {
   background-color: #f56c6c;
 }
 
+.task-bar.status-unpicked {
+  background-color: #909399;
+}
+
 .task-label {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -553,6 +566,10 @@ onMounted(() => {
 
 .legend-color.status-overdue {
   background-color: #f56c6c;
+}
+
+.legend-color.status-unpicked {
+  background-color: #909399;
 }
 
 @media screen and (max-width: 768px) {

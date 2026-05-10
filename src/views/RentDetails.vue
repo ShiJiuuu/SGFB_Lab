@@ -119,6 +119,9 @@
             <el-option label="逾期未还" :value="2">
               <span style="color: #f56c6c">逾期未还</span>
             </el-option>
+            <el-option label="预约未取" :value="4">
+              <span style="color: #909399">预约未取</span>
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="备注">
@@ -153,6 +156,7 @@
         <el-option label="已借出" value="borrowed" />
         <el-option label="已归还" value="returned" />
         <el-option label="逾期未还" value="overdue" />
+        <el-option label="预约未取" value="unpicked" />
       </el-select>
       <el-date-picker
         v-model="dateRange"
@@ -291,6 +295,9 @@
               </el-option>
               <el-option label="逾期未还" :value="2">
                 <span style="color: #f56c6c">逾期未还</span>
+              </el-option>
+              <el-option label="预约未取" :value="4">
+                <span style="color: #909399">预约未取</span>
               </el-option>
             </el-select>
           </template>
@@ -513,6 +520,7 @@ const getStatusClass = (rental) => {
   if (status === 1) return 'returned'   // 已归还
   if (status === 2) return 'overdue'    // 逾期未还
   if (status === 3) return 'borrowed'   // 已借出
+  if (status === 4) return 'unpicked'   // 预约未取
   return 'reserved'
 }
 
@@ -521,6 +529,7 @@ const getStatusType = (rental) => {
   if (status === 'reserved') return 'warning'   // 已预约 - 黄色
   if (status === 'borrowed') return 'primary'   // 已借出 - 蓝色
   if (status === 'overdue') return 'danger'     // 逾期未还 - 红色
+  if (status === 'unpicked') return 'info'      // 预约未取 - 灰色
   return 'success'                              // 已归还 - 绿色
 }
 
@@ -529,6 +538,7 @@ const getStatusText = (rental) => {
   if (status === 'reserved') return '已预约'
   if (status === 'borrowed') return '已借出'
   if (status === 'overdue') return '逾期未还'
+  if (status === 'unpicked') return '预约未取'
   return '已归还'
 }
 
