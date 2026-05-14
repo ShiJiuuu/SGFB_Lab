@@ -136,7 +136,7 @@ public class RentRecordController {
             }
         }
         
-        wrapper.orderByAsc(RentRecord::getBrwtime);
+        wrapper.orderByAsc(RentRecord::getBrwtime, RentRecord::getId);
         
         Page<RentRecord> pageResult = rentRecordService.page(new Page<>(page, pageSize), wrapper);
         List<RentRecord> records = pageResult.getRecords();
@@ -274,7 +274,7 @@ public class RentRecordController {
             wrapper.le(RentRecord::getBrwtime, LocalDateTime.of(endDate, LocalTime.MAX));
         }
         
-        wrapper.orderByAsc(RentRecord::getBrwtime);
+        wrapper.orderByAsc(RentRecord::getBrwtime, RentRecord::getId);
         
         List<RentRecord> records = rentRecordService.list(wrapper);
         List<Device> devices = deviceService.getAllDevices();
