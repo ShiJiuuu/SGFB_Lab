@@ -179,7 +179,7 @@
 <script setup>
 import { reactive, ref, onMounted, computed, watch } from 'vue'
 import { marked } from 'marked'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Camera, User, Tickets, Phone, Setting, Calendar, Check, RefreshRight, CircleCheck, Bell } from '@element-plus/icons-vue'
 import TimeSlotPicker from '../components/TimeSlotPicker.vue'
 
@@ -291,13 +291,24 @@ const handleSubmit = async () => {
   await borrowFormRef.value.validate(async (valid) => {
     if (!valid) return
     
+    const borrowTime = new Date(borrowForm.borrowDate)
+    const now = new Date()
+    const minBorrowTime = new Date(now.getTime() + 3 * 60 * 60 * 1000)
+    if (borrowTime < minBorrowTime) {
+      ElMessageBox.alert('设备需至少提前3小时预约，请重新选择时间', '提示', {
+        confirmButtonText: '确定',
+        type: 'warning'
+      })
+      return
+    }
+
     if (!borrowForm.camera && !borrowForm.lens && !borrowForm.other) {
       ElMessage.warning('请至少选择一个设备')
       return
     }
-    
+
     loading.value = true
-    
+
     try {
       const response = await fetch('/api/rent-records', {
         method: 'POST',
