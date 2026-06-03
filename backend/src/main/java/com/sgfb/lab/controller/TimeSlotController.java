@@ -1,8 +1,8 @@
-package com.sgfb.rent.controller;
+package com.sgfb.lab.controller;
 
-import com.sgfb.rent.entity.TimeSlot;
-import com.sgfb.rent.mapper.TimeSlotMapper;
-import com.sgfb.rent.service.TimeSlotService;
+import com.sgfb.lab.entity.TimeSlot;
+import com.sgfb.lab.mapper.TimeSlotMapper;
+import com.sgfb.lab.service.TimeSlotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

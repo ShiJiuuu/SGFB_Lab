@@ -1,4 +1,4 @@
-package com.sgfb.rent;
+package com.sgfb.lab;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@MapperScan("com.sgfb.rent.mapper")
+@MapperScan("com.sgfb.lab.mapper")
 @EnableScheduling
 public class RentApplication {
     public static void main(String[] args) {

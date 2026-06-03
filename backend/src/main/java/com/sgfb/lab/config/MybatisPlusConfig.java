@@ -1,4 +1,4 @@
-package com.sgfb.rent.config;
+package com.sgfb.lab.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;

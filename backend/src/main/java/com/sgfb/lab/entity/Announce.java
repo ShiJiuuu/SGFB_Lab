@@ -1,4 +1,4 @@
-package com.sgfb.rent.entity;
+package com.sgfb.lab.entity;
 
 public class Announce {
     private String announce;

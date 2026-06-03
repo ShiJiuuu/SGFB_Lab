@@ -1,9 +1,9 @@
-package com.sgfb.rent.service;
+package com.sgfb.lab.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.sgfb.rent.entity.TimeSlot;
-import com.sgfb.rent.mapper.TimeSlotMapper;
+import com.sgfb.lab.entity.TimeSlot;
+import com.sgfb.lab.mapper.TimeSlotMapper;
 import org.springframework.stereotype.Service;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;

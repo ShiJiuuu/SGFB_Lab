@@ -1,8 +1,8 @@
-package com.sgfb.rent.service;
+package com.sgfb.lab.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.sgfb.rent.entity.User;
-import com.sgfb.rent.mapper.UserMapper;
+import com.sgfb.lab.entity.User;
+import com.sgfb.lab.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

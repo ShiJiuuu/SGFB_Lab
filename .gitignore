@@ -1,3 +1,7 @@
 node_modules
 .DS_Store
 frontend.log
+.agent
+.claude
+.cursor
+.idea

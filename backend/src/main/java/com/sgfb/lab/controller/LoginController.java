@@ -1,7 +1,7 @@
-package com.sgfb.rent.controller;
+package com.sgfb.lab.controller;
 
-import com.sgfb.rent.entity.User;
-import com.sgfb.rent.service.UserService;
+import com.sgfb.lab.entity.User;
+import com.sgfb.lab.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

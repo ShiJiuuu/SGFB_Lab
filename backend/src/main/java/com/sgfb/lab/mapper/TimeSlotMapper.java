@@ -1,8 +1,8 @@
-package com.sgfb.rent.mapper;
+package com.sgfb.lab.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.sgfb.rent.entity.TimeSlot;
+import com.sgfb.lab.entity.TimeSlot;
 import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 

@@ -10,7 +10,7 @@ spring:
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.sgfb.rent.entity
+  type-aliases-package: com.sgfb.lab.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -21,4 +21,4 @@ mybatis-plus:
 
 logging:
   level:
-    com.sgfb.rent: debug
+    com.sgfb.lab: debug

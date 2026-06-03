@@ -1,11 +1,11 @@
-package com.sgfb.rent.controller;
+package com.sgfb.lab.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.sgfb.rent.entity.Device;
-import com.sgfb.rent.entity.RentRecord;
-import com.sgfb.rent.service.DeviceService;
-import com.sgfb.rent.service.RentRecordService;
+import com.sgfb.lab.entity.Device;
+import com.sgfb.lab.entity.RentRecord;
+import com.sgfb.lab.service.DeviceService;
+import com.sgfb.lab.service.RentRecordService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;

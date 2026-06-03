@@ -1,6 +1,6 @@
-package com.sgfb.rent.controller;
+package com.sgfb.lab.controller;
 
-import com.sgfb.rent.service.AnnounceService;
+import com.sgfb.lab.service.AnnounceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

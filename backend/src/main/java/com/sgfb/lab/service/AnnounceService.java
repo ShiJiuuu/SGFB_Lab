@@ -1,6 +1,6 @@
-package com.sgfb.rent.service;
+package com.sgfb.lab.service;
 
-import com.sgfb.rent.mapper.AnnounceMapper;
+import com.sgfb.lab.mapper.AnnounceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

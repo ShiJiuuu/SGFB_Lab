@@ -1,7 +1,7 @@
-package com.sgfb.rent.mapper;
+package com.sgfb.lab.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.sgfb.rent.entity.Device;
+import com.sgfb.lab.entity.Device;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

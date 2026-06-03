@@ -1,11 +1,11 @@
-package com.sgfb.rent.service;
+package com.sgfb.lab.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.sgfb.rent.entity.Device;
-import com.sgfb.rent.entity.RentRecord;
-import com.sgfb.rent.mapper.DeviceMapper;
-import com.sgfb.rent.mapper.RentRecordMapper;
+import com.sgfb.lab.entity.Device;
+import com.sgfb.lab.entity.RentRecord;
+import com.sgfb.lab.mapper.DeviceMapper;
+import com.sgfb.lab.mapper.RentRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;

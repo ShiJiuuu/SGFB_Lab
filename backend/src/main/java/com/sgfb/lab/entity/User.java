@@ -1,4 +1,4 @@
-package com.sgfb.rent.entity;
+package com.sgfb.lab.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

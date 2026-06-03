@@ -1,4 +1,4 @@
-package com.sgfb.rent.mapper;
+package com.sgfb.lab.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;

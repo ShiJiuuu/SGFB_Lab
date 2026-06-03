@@ -1,7 +1,7 @@
-package com.sgfb.rent.controller;
+package com.sgfb.lab.controller;
 
-import com.sgfb.rent.entity.Device;
-import com.sgfb.rent.service.DeviceService;
+import com.sgfb.lab.entity.Device;
+import com.sgfb.lab.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
