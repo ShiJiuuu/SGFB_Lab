@@ -5,7 +5,7 @@
  Source Server Type    : MySQL
  Source Server Version : 80043 (8.0.43)
  Source Host           : localhost:3306
- Source Schema         : RENT_SYS
+ Source Schema         : LAB_SYS
 
  Target Server Type    : MySQL
  Target Server Version : 80043 (8.0.43)
@@ -18,35 +18,31 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for DEVICE_LIST
+-- Table structure for CLASSROOM_LIST
 -- ----------------------------
-DROP TABLE IF EXISTS `DEVICE_LIST`;
-CREATE TABLE `DEVICE_LIST` (
+DROP TABLE IF EXISTS `CLASSROOM_LIST`;
+CREATE TABLE `CLASSROOM_LIST` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `NAME` varchar(255) NOT NULL COMMENT '器材名称',
-  `BRAND` varchar(255) NOT NULL COMMENT '器材品牌',
-  `TYPE` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '器材类型',
-  `STATUS` tinyint NOT NULL DEFAULT '0' COMMENT '状态码：0正常库存 1已预约借出 2逾期未还 3设备故障',
+  `NAME` varchar(255) NOT NULL COMMENT '教室名称',
+  `LOCATION` varchar(255) DEFAULT '' COMMENT '教室位置',
+  `CAPACITY` int DEFAULT 0 COMMENT '容纳人数',
+  `STATUS` tinyint NOT NULL DEFAULT '0' COMMENT '状态码：0空闲 1已预约 2使用中 3维护中',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='摄影器材列表';
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='实验室/教室列表';
 
 -- ----------------------------
--- Records of DEVICE_LIST
+-- Records of CLASSROOM_LIST
 -- ----------------------------
 BEGIN;
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (1, 'SONY A7M4-01', '索尼/SONY', '相机/Camara', 0);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (2, 'SONY A7M4-02', '索尼/SONY', '相机/Camara', 2);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (3, 'SONY A7M4-03', '索尼/SONY', '相机/Camara', 2);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (4, 'SONY A7M4-04', '索尼/SONY', '相机/Camara', 1);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (5, 'SONY Cinema FX3', '索尼/SONY', '相机/Camara', 1);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (6, 'FE 24-70mm OSS', '索尼/SONY', '镜头/Lens', 0);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (7, 'FE 24-105mm OSS', '索尼/SONY', '镜头/Lens', 0);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (8, 'SONY Cinema FX3', '索尼/SONY', '相机/Camara', 1);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (9, 'SONY Cinema FX3', '索尼/SONY', '相机/Camara', 0);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (10, 'SONY Cinema FX3', '索尼/SONY', '相机/Camara', 0);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (11, 'MEKE 35mm f1.8', 'MEKE', '镜头', 1);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (12, 'MEKE', 'MEKE', 'lens', 1);
-INSERT INTO `DEVICE_LIST` (`id`, `NAME`, `BRAND`, `TYPE`, `STATUS`) VALUES (13, 'DJI Nano 3', '大疆DJI', '云台', 1);
+INSERT INTO `CLASSROOM_LIST` (`id`, `NAME`, `LOCATION`, `CAPACITY`, `STATUS`) VALUES (1, '数字媒体实验室 A101', '综合楼 A 区 1 楼', 40, 0);
+INSERT INTO `CLASSROOM_LIST` (`id`, `NAME`, `LOCATION`, `CAPACITY`, `STATUS`) VALUES (2, '人工智能实验室 A102', '综合楼 A 区 1 楼', 30, 0);
+INSERT INTO `CLASSROOM_LIST` (`id`, `NAME`, `LOCATION`, `CAPACITY`, `STATUS`) VALUES (3, '影视后期实验室 B201', '综合楼 B 区 2 楼', 35, 0);
+INSERT INTO `CLASSROOM_LIST` (`id`, `NAME`, `LOCATION`, `CAPACITY`, `STATUS`) VALUES (4, '网络工程实验室 B202', '综合楼 B 区 2 楼', 40, 0);
+INSERT INTO `CLASSROOM_LIST` (`id`, `NAME`, `LOCATION`, `CAPACITY`, `STATUS`) VALUES (5, '虚拟现实实验室 C301', '综合楼 C 区 3 楼', 25, 0);
+INSERT INTO `CLASSROOM_LIST` (`id`, `NAME`, `LOCATION`, `CAPACITY`, `STATUS`) VALUES (6, '软件工程实验室 C302', '综合楼 C 区 3 楼', 45, 0);
+INSERT INTO `CLASSROOM_LIST` (`id`, `NAME`, `LOCATION`, `CAPACITY`, `STATUS`) VALUES (7, '语音实验室 D401', '综合楼 D 区 4 楼', 50, 0);
+INSERT INTO `CLASSROOM_LIST` (`id`, `NAME`, `LOCATION`, `CAPACITY`, `STATUS`) VALUES (8, '计算机基础实验室 D402', '综合楼 D 区 4 楼', 60, 0);
+INSERT INTO `CLASSROOM_LIST` (`id`, `NAME`, `LOCATION`, `CAPACITY`, `STATUS`) VALUES (9, '创新实践实验室 E501', '综合楼 E 区 5 楼', 20, 0);
 COMMIT;
 
 -- ----------------------------
@@ -61,7 +57,7 @@ CREATE TABLE `RENT_ANC` (
 -- Records of RENT_ANC
 -- ----------------------------
 BEGIN;
-INSERT INTO `RENT_ANC` (`ANNOUNCE`) VALUES ('# AHHHHHHHH！');
+INSERT INTO `RENT_ANC` (`ANNOUNCE`) VALUES ('# 实验室预约系统使用须知\n\n欢迎使用实验室预约系统！请遵守以下规定：\n- 请提前至少 3 小时预约\n- 每次可选择多间教室\n- 使用完毕后请及时归还');
 COMMIT;
 
 -- ----------------------------
@@ -73,35 +69,42 @@ CREATE TABLE `RENT_LIST` (
   `NAME` varchar(50) NOT NULL COMMENT '姓名',
   `NUM` varchar(15) NOT NULL COMMENT '学号',
   `TEL` varchar(15) NOT NULL COMMENT '手机号',
-  `CAMARA` int DEFAULT NULL COMMENT '相机型号',
-  `LENS` int DEFAULT NULL COMMENT '镜头型号',
-  `OTHER` int DEFAULT NULL COMMENT '其他设备型号',
-  `BRWTIME` datetime NOT NULL COMMENT '预约时间',
-  `RTNTIME` datetime NOT NULL COMMENT '归还时间',
-  `STATUS` tinyint NOT NULL COMMENT '特殊订单状态码，默认0借出中，1已完成，2逾期未还',
+  `STATUS` tinyint NOT NULL COMMENT '特殊订单状态码，默认0已预约，1已完成，2逾期未还',
   `REMARK` varchar(255) DEFAULT '' COMMENT '备注信息',
-  PRIMARY KEY (`id`),
-  KEY `Camara` (`CAMARA`),
-  KEY `Lens` (`LENS`),
-  KEY `Stabilizer` (`OTHER`),
-  CONSTRAINT `Camara` FOREIGN KEY (`CAMARA`) REFERENCES `DEVICE_LIST` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT `Lens` FOREIGN KEY (`LENS`) REFERENCES `DEVICE_LIST` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT `Stabilizer` FOREIGN KEY (`OTHER`) REFERENCES `DEVICE_LIST` (`id`) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='摄影器材预约记录表主表';
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='实验室预约记录表主表';
 
 -- ----------------------------
 -- Records of RENT_LIST
 -- ----------------------------
 BEGIN;
-INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `CAMARA`, `LENS`, `OTHER`, `BRWTIME`, `RTNTIME`, `STATUS`, `REMARK`) VALUES ('202604030001', '蔚嘉琪', '2023013090', '15036156580', 1, NULL, NULL, '2026-04-03 14:23:54', '2026-04-04 14:23:57', 2, '测试数据');
-INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `CAMARA`, `LENS`, `OTHER`, `BRWTIME`, `RTNTIME`, `STATUS`, `REMARK`) VALUES ('202604030002', '王乾博', '2020023020', '13632418372', 2, NULL, NULL, '2026-04-03 16:17:52', '2026-04-04 16:17:56', 1, '测试数据');
-INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `CAMARA`, `LENS`, `OTHER`, `BRWTIME`, `RTNTIME`, `STATUS`, `REMARK`) VALUES ('202604050001', 'jij', '2039482910', '15349203918', 2, NULL, NULL, '2026-04-05 14:00:00', '2026-04-08 14:00:00', 2, '数据测试');
-INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `CAMARA`, `LENS`, `OTHER`, `BRWTIME`, `RTNTIME`, `STATUS`, `REMARK`) VALUES ('202604050002', '陈玲聿', '2023013029', '13829489348', 1, NULL, NULL, '2026-04-05 00:00:00', '2026-04-06 00:00:00', 2, '数据测试');
-INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `CAMARA`, `LENS`, `OTHER`, `BRWTIME`, `RTNTIME`, `STATUS`, `REMARK`) VALUES ('202604050003', '蔚嘉琪', '2023013090', '15036156580', 5, 6, NULL, '2026-04-05 10:00:00', '2026-04-06 17:00:00', 1, '测试数据');
-INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `CAMARA`, `LENS`, `OTHER`, `BRWTIME`, `RTNTIME`, `STATUS`, `REMARK`) VALUES ('202604050004', '为佳', '29304903', '13647382948', 3, NULL, NULL, '2026-04-05 11:17:00', '2026-04-05 14:00:00', 2, '测试数据');
-INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `CAMARA`, `LENS`, `OTHER`, `BRWTIME`, `RTNTIME`, `STATUS`, `REMARK`) VALUES ('202604050005', '应雨希', '2023013787', '15876492887', 3, NULL, NULL, '2026-04-06 11:00:00', '2026-04-07 08:00:00', 2, '手机测试');
-INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `CAMARA`, `LENS`, `OTHER`, `BRWTIME`, `RTNTIME`, `STATUS`, `REMARK`) VALUES ('202604090001', '英语系', '2023013783', '19191991919', 8, 11, NULL, '2026-04-09 19:18:00', '2026-04-10 00:00:00', 0, 'yyx是大sharkbee');
-INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `CAMARA`, `LENS`, `OTHER`, `BRWTIME`, `RTNTIME`, `STATUS`, `REMARK`) VALUES ('202604090002', 'Jiaqi Kirby Yu', '2023013090', '15036156580', 5, 12, 13, '2026-04-09 20:04:00', '2026-04-11 00:00:00', 0, 'yiyayiyayo');
+INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `STATUS`, `REMARK`) VALUES ('202606080001', '张三', '2023013001', '13800138001', 1, '测试数据');
+INSERT INTO `RENT_LIST` (`id`, `NAME`, `NUM`, `TEL`, `STATUS`, `REMARK`) VALUES ('202606080002', '李四', '2023013002', '13800138002', 0, '测试数据');
+COMMIT;
+
+-- ----------------------------
+-- Table structure for RENT_ROOM (订单-教室关联表)
+-- ----------------------------
+DROP TABLE IF EXISTS `RENT_ROOM`;
+CREATE TABLE `RENT_ROOM` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `rent_id` varchar(20) NOT NULL COMMENT '订单ID',
+  `room_id` int NOT NULL COMMENT '教室ID',
+  `BRWTIME` datetime NOT NULL COMMENT '预约时间',
+  `RTNTIME` datetime NOT NULL COMMENT '归还时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_rent_id` (`rent_id`),
+  KEY `idx_room_id` (`room_id`),
+  CONSTRAINT `fk_rent_room_rent` FOREIGN KEY (`rent_id`) REFERENCES `RENT_LIST` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_rent_room_room` FOREIGN KEY (`room_id`) REFERENCES `CLASSROOM_LIST` (`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='订单-教室关联表';
+
+-- ----------------------------
+-- Records of RENT_ROOM
+-- ----------------------------
+BEGIN;
+INSERT INTO `RENT_ROOM` (`rent_id`, `room_id`, `BRWTIME`, `RTNTIME`) VALUES ('202606080001', 1, '2026-06-08 09:00:00', '2026-06-08 12:00:00');
+INSERT INTO `RENT_ROOM` (`rent_id`, `room_id`, `BRWTIME`, `RTNTIME`) VALUES ('202606080002', 3, '2026-06-08 14:00:00', '2026-06-08 18:00:00');
 COMMIT;
 
 -- ----------------------------

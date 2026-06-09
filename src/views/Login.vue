@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h2>影视器材预约系统后台管理</h2>
+      <h2>实验室预约系统后台管理</h2>
       <p class="login-hint">（此为后台管理页面，预约请选择"预约申请"页面）</p>
       <form @submit.prevent="handleLogin">
         <div class="form-item">

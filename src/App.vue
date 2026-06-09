@@ -3,7 +3,7 @@
     <el-aside width="200px" class="desktop-aside">
       <div class="logo">
         <img src="../SGFBLogo.png" alt="Logo" class="logo-img" />
-        <div class="logo-text">影视器材预约系统</div>
+        <div class="logo-text">实验室预约系统</div>
       </div>
       <el-menu
         :default-active="activeMenu"
@@ -22,9 +22,9 @@
           <el-icon><List /></el-icon>
           <span>预约单详情</span>
         </el-menu-item>
-        <el-menu-item index="/equipment-management">
+        <el-menu-item index="/classroom-management">
           <el-icon><Tools /></el-icon>
-          <span>设备管理</span>
+          <span>教室管理</span>
         </el-menu-item>
         <el-menu-item index="/time-slot-management">
           <el-icon><Clock /></el-icon>
@@ -44,7 +44,7 @@
         <el-button text @click="drawerVisible = true">
           <el-icon><Menu /></el-icon>
         </el-button>
-        <div class="mobile-title">影视器材预约系统</div>
+        <div class="mobile-title">实验室预约系统</div>
         <div></div>
       </el-header>
       
@@ -61,7 +61,7 @@
     >
       <div class="drawer-logo">
         <img src="../SGFBLogo.png" alt="Logo" class="logo-img" />
-        <div class="logo-text">影视器材预约系统</div>
+        <div class="logo-text">实验室预约系统</div>
       </div>
       <el-menu
         :default-active="activeMenu"
@@ -81,9 +81,9 @@
           <el-icon><List /></el-icon>
           <span>预约单详情</span>
         </el-menu-item>
-        <el-menu-item index="/equipment-management">
+        <el-menu-item index="/classroom-management">
           <el-icon><Tools /></el-icon>
-          <span>设备管理</span>
+          <span>教室管理</span>
         </el-menu-item>
         <el-menu-item index="/time-slot-management">
           <el-icon><Clock /></el-icon>

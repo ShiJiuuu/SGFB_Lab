@@ -4,7 +4,7 @@
       <el-icon class="header-icon"><DataLine /></el-icon>
       <span>预约甘特图</span>
     </div>
-    
+
     <div class="date-navigation">
       <el-button-group>
         <el-button @click="previousDay">前一天</el-button>
@@ -29,7 +29,7 @@
         </div>
         <div class="legend-item">
           <div class="legend-color status-returned"></div>
-          <span>已归还</span>
+          <span>已完成</span>
         </div>
         <div class="legend-item">
           <div class="legend-color status-overdue"></div>
@@ -41,20 +41,20 @@
         </div>
       </div>
     </div>
-    
+
     <div class="gantt-container">
       <div class="gantt-left-header">
-        <div class="header-cell">设备</div>
+        <div class="header-cell">教室</div>
       </div>
-      <div 
+      <div
         class="gantt-right-header"
         ref="headerRef"
         @scroll="handleHeaderScroll"
       >
         <div class="header-row">
-          <div 
-            v-for="(hour, index) in timelineHours" 
-            :key="'date-' + index" 
+          <div
+            v-for="(hour, index) in timelineHours"
+            :key="'date-' + index"
             class="header-date-cell"
             :style="{ width: '20px' }"
           >
@@ -64,9 +64,9 @@
           </div>
         </div>
         <div class="header-row">
-          <div 
-            v-for="(hour, index) in timelineHours" 
-            :key="'hour-' + index" 
+          <div
+            v-for="(hour, index) in timelineHours"
+            :key="'hour-' + index"
             class="header-hour-cell"
             :class="{ 'today': isNow(hour.time) }"
             :style="{ width: '20px' }"
@@ -75,29 +75,29 @@
           </div>
         </div>
       </div>
-      
+
       <div class="gantt-left-body">
-        <div 
-          v-for="equipment in equipmentList" 
-          :key="equipment.id" 
+        <div
+          v-for="classroom in classroomList"
+          :key="classroom.id"
           class="row-cell"
         >
-          <div class="equipment-name">{{ equipment.name }}</div>
-          <div class="equipment-type">{{ equipment.type }}</div>
+          <div class="classroom-name">{{ classroom.name }}</div>
+          <div class="classroom-location">{{ classroom.location }}</div>
         </div>
       </div>
-      <div 
+      <div
         class="gantt-right-body"
         ref="bodyRef"
         @scroll="handleBodyScroll"
       >
-        <div 
-          v-for="equipment in equipmentList" 
-          :key="equipment.id" 
+        <div
+          v-for="classroom in classroomList"
+          :key="classroom.id"
           class="row-body"
         >
-          <div 
-            v-for="task in getEquipmentTasks(equipment.id)" 
+          <div
+            v-for="task in getClassroomTasks(classroom.id)"
             :key="task.id"
             class="task-bar"
             :style="getTaskBarStyle(task)"
@@ -117,7 +117,7 @@ import { ElMessage } from 'element-plus'
 import { DataLine } from '@element-plus/icons-vue'
 
 const currentDate = ref(new Date())
-const equipmentList = ref([])
+const classroomList = ref([])
 const rentalRecords = ref([])
 const headerRef = ref(null)
 const bodyRef = ref(null)
@@ -127,7 +127,7 @@ const timelineHours = computed(() => {
   const hours = []
   const startDate = new Date(currentDate.value)
   startDate.setHours(0, 0, 0, 0)
-  
+
   for (let i = 0; i < 96; i++) {
     const date = new Date(startDate)
     date.setHours(startDate.getHours() + i)
@@ -137,7 +137,7 @@ const timelineHours = computed(() => {
     const prevHour = new Date(startDate)
     prevHour.setHours(startDate.getHours() + i - 1)
     const isNewDay = i === 0 || prevHour.getDate() !== day
-    
+
     hours.push({
       time: date.toISOString(),
       hourLabel: hour,
@@ -150,7 +150,7 @@ const timelineHours = computed(() => {
 
 const allTasks = computed(() => {
   const tasks = []
-  
+
   rentalRecords.value.forEach(rental => {
     const status = getStatusClass(rental)
     let barColor = '#67c23a'
@@ -158,49 +158,28 @@ const allTasks = computed(() => {
     else if (status === 'borrowed') barColor = '#409eff'
     else if (status === 'overdue') barColor = '#f56c6c'
     else if (status === 'unpicked') barColor = '#909399'
-    
-    if (rental.camara?.id) {
-      tasks.push({
-        id: `${rental.id}-camara`,
-        name: rental.name,
-        equipmentId: rental.camara.id,
-        startDate: rental.brwtime,
-        endDate: rental.rtuntime,
-        status: status,
-        color: barColor
-      })
+
+    const rooms = rental.rooms || []
+    rooms.forEach(room => {
+      if (room?.id) {
+        tasks.push({
+          id: `${rental.id}-room-${room.id}`,
+          name: rental.name,
+          classroomId: room.id,
+          startDate: room.brwtime,
+          endDate: room.rtuntime,
+          status: status,
+          color: barColor
+        })
     }
-    
-    if (rental.lens?.id) {
-      tasks.push({
-        id: `${rental.id}-lens`,
-        name: rental.name,
-        equipmentId: rental.lens.id,
-        startDate: rental.brwtime,
-        endDate: rental.rtuntime,
-        status: status,
-        color: barColor
-      })
-    }
-    
-    if (rental.other?.id) {
-      tasks.push({
-        id: `${rental.id}-other`,
-        name: rental.name,
-        equipmentId: rental.other.id,
-        startDate: rental.brwtime,
-        endDate: rental.rtuntime,
-        status: status,
-        color: barColor
-      })
-    }
+    })
   })
-  
+
   return tasks
 })
 
-const getEquipmentTasks = (equipmentId) => {
-  return allTasks.value.filter(task => task.equipmentId === equipmentId)
+const getClassroomTasks = (classroomId) => {
+  return allTasks.value.filter(task => task.classroomId === classroomId)
 }
 
 const getTaskBarStyle = (task) => {
@@ -210,19 +189,19 @@ const getTaskBarStyle = (task) => {
   const timelineStart = new Date(timelineHours.value[0].time)
   const timelineEnd = new Date(timelineHours.value[timelineHours.value.length - 1].time)
   timelineEnd.setMinutes(59, 59, 999)
-  
+
   if (endDate < timelineStart || startDate > timelineEnd) {
     return {
       display: 'none'
     }
   }
-  
+
   const hourStart = Math.max(0, (startDate - timelineStart) / (60 * 60 * 1000))
   const hourEnd = Math.min(timelineHours.value.length - 1, (endDate - timelineStart) / (60 * 60 * 1000))
-  
+
   const left = hourStart * hourWidth
   const width = Math.max(hourWidth, (hourEnd - hourStart) * hourWidth)
-  
+
   return {
     left: `${left}px`,
     width: `${width}px`,
@@ -241,9 +220,9 @@ const isNow = (timeStr) => {
 const getStatusClass = (rental) => {
   const status = rental.status
   if (status === 0) return 'reserved'   // 已预约
-  if (status === 1) return 'returned'   // 已归还
+  if (status === 1) return 'returned'   // 已完成
   if (status === 2) return 'overdue'    // 逾期未还
-  if (status === 3) return 'borrowed'   // 已借出
+  if (status === 3) return 'borrowed'   // 使用中
   if (status === 4) return 'unpicked'   // 预约未取
   return 'reserved'
 }
@@ -309,18 +288,18 @@ const handleBodyScroll = () => {
 const fetchData = async () => {
   try {
     const timeParam = encodeURIComponent(buildGanttTimeParam())
-    const [devicesRes, recordsRes] = await Promise.all([
-      fetch('/api/devices'),
+    const [classroomsRes, recordsRes] = await Promise.all([
+      fetch('/api/classrooms'),
       fetch(`/api/rent-records/gantt?time=${timeParam}`)
     ])
-    
-    const devicesData = await devicesRes.json()
+
+    const classroomsData = await classroomsRes.json()
     const recordsData = await recordsRes.json()
-    
-    if (devicesData.success) {
-      equipmentList.value = devicesData.data
+
+    if (classroomsData.success) {
+      classroomList.value = classroomsData.data
     }
-    
+
     if (recordsData.success) {
       rentalRecords.value = recordsData.data
     }
@@ -470,13 +449,13 @@ onMounted(() => {
   min-width: 1920px;
 }
 
-.equipment-name {
+.classroom-name {
   font-weight: 600;
   color: #303133;
   font-size: 14px;
 }
 
-.equipment-type {
+.classroom-location {
   font-size: 12px;
   color: #909399;
   margin-top: 2px;
@@ -576,17 +555,17 @@ onMounted(() => {
   .gantt-page {
     padding: 20px 15px;
   }
-  
+
   .page-header {
     font-size: 18px;
     margin-bottom: 20px;
     padding-bottom: 15px;
   }
-  
+
   .header-icon {
     font-size: 22px;
   }
-  
+
   .legend {
     flex-wrap: wrap;
     gap: 15px;

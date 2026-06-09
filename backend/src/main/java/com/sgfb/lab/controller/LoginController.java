@@ -27,7 +27,7 @@ public class LoginController {
         if (user != null) {
             result.put("success", true);
             result.put("message", "登录成功");
-            result.put("token", "device-rent-token-" + user.getId());
+            result.put("token", "lab-rent-token-" + user.getId());
             result.put("user", user);
         } else {
             result.put("success", false);

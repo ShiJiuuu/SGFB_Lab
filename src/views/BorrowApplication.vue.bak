@@ -30,14 +30,18 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column label="预约时间" width="450">
+        <el-table-column label="预约时间" width="210">
           <template #default="{ row, $index }">
-            <TimeSlotPicker v-model="row.brwtime" label="开始时间" @update:model-value="onTimeChange($index)" />
+            <el-date-picker v-model="row.brwtime" type="datetime" placeholder="开始时间"
+              format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm" style="width: 100%"
+              @change="onTimeChange($index)" />
           </template>
         </el-table-column>
-        <el-table-column label="归还时间" width="450">
+        <el-table-column label="归还时间" width="210">
           <template #default="{ row, $index }">
-            <TimeSlotPicker v-model="row.rtuntime" label="结束时间" @update:model-value="onTimeChange($index)" />
+            <el-date-picker v-model="row.rtuntime" type="datetime" placeholder="结束时间"
+              format="YYYY-MM-DD HH:mm" value-format="YYYY-MM-DD HH:mm" style="width: 100%"
+              @change="onTimeChange($index)" />
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100">
@@ -162,7 +166,6 @@ import { reactive, ref, onMounted, computed } from 'vue'
 import { marked } from 'marked'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { School, User, Tickets, Phone, Check, RefreshRight, CircleCheck, Bell, Plus, CircleClose } from '@element-plus/icons-vue'
-import TimeSlotPicker from '../components/TimeSlotPicker.vue'
 
 const borrowFormRef = ref()
 const loading = ref(false)
@@ -377,15 +380,9 @@ const openAnnounce = async () => {
   try {
     const res = await fetch('/api/announce')
     const data = await res.json()
-    if (data.success && data.data) {
-      announceContent.value = data.data
-      announceVisible.value = true
-    } else {
-      ElMessage.info('暂无公告')
-    }
-  } catch (e) {
-    ElMessage.error('获取公告失败')
-  }
+    if (data.success && data.data) announceContent.value = data.data; announceVisible.value = true
+    else ElMessage.info('暂无公告')
+  } catch (e) { ElMessage.error('获取公告失败') }
 }
 </script>
 

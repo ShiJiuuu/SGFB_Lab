@@ -4,13 +4,13 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://121.41.57.98:3306/RENT_SYS?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/LAB_SYS?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: shijiu
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.sgfb.rent.entity
+  type-aliases-package: com.sgfb.lab.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -21,4 +21,4 @@ mybatis-plus:
 
 logging:
   level:
-    com.sgfb.rent: debug
+    com.sgfb.lab: debug

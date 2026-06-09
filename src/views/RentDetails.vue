@@ -26,7 +26,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="editDialogVisible" title="修改订单" width="600px">
+    <el-dialog v-model="editDialogVisible" title="修改订单" width="500px">
       <el-form :model="editForm" label-width="100px">
         <el-form-item label="姓名">
           <el-input v-model="editForm.name" placeholder="请输入姓名" />
@@ -37,84 +37,16 @@
         <el-form-item label="手机号">
           <el-input v-model="editForm.tel" placeholder="请输入手机号" />
         </el-form-item>
-        <el-form-item label="相机">
-          <el-select
-            v-model="editForm.camara"
-            placeholder="请选择相机"
-            clearable
-            filterable
-            style="width: 100%"
-          >
-            <el-option
-              v-for="device in camaraList"
-              :key="device.id"
-              :label="device.name + ' (' + device.brand + ')'"
-              :value="device.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="镜头">
-          <el-select
-            v-model="editForm.lens"
-            placeholder="请选择镜头"
-            clearable
-            filterable
-            style="width: 100%"
-          >
-            <el-option
-              v-for="device in lensList"
-              :key="device.id"
-              :label="device.name + ' (' + device.brand + ')'"
-              :value="device.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="其他设备">
-          <el-select
-            v-model="editForm.other"
-            placeholder="请选择其他设备"
-            clearable
-            filterable
-            style="width: 100%"
-          >
-            <el-option
-              v-for="device in otherDeviceList"
-              :key="device.id"
-              :label="device.name + ' (' + device.brand + ')'"
-              :value="device.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="预约时间">
-          <el-date-picker
-            v-model="editForm.brwtime"
-            type="datetime"
-            placeholder="选择预约时间"
-            style="width: 100%"
-            format="YYYY-MM-DD HH:mm"
-            value-format="YYYY-MM-DD HH:mm"
-          />
-        </el-form-item>
-        <el-form-item label="归还时间">
-          <el-date-picker
-            v-model="editForm.rtuntime"
-            type="datetime"
-            placeholder="选择归还时间"
-            style="width: 100%"
-            format="YYYY-MM-DD HH:mm"
-            value-format="YYYY-MM-DD HH:mm"
-          />
-        </el-form-item>
         <el-form-item label="订单状态">
           <el-select v-model="editForm.status" placeholder="请选择状态" style="width: 100%">
             <el-option label="已预约" :value="0">
               <span style="color: #e6a23c">已预约</span>
             </el-option>
-            <el-option label="已借出" :value="3">
-              <span style="color: #409eff">已借出</span>
+            <el-option label="使用中" :value="3">
+              <span style="color: #409eff">使用中</span>
             </el-option>
-            <el-option label="已归还" :value="1">
-              <span style="color: #67c23a">已归还</span>
+            <el-option label="已完成" :value="1">
+              <span style="color: #67c23a">已完成</span>
             </el-option>
             <el-option label="逾期未还" :value="2">
               <span style="color: #f56c6c">逾期未还</span>
@@ -133,7 +65,7 @@
         <el-button type="primary" @click="confirmEdit">确定</el-button>
       </template>
     </el-dialog>
-    
+
     <div class="search-bar">
       <el-input
         v-model="searchText"
@@ -153,8 +85,8 @@
       >
         <el-option label="全部" value="" />
         <el-option label="已预约" value="reserved" />
-        <el-option label="已借出" value="borrowed" />
-        <el-option label="已归还" value="returned" />
+        <el-option label="使用中" value="borrowed" />
+        <el-option label="已完成" value="returned" />
         <el-option label="逾期未还" value="overdue" />
         <el-option label="预约未取" value="unpicked" />
       </el-select>
@@ -177,8 +109,8 @@
         <el-icon><RefreshRight /></el-icon>
         重置
       </el-button>
-      <el-button 
-        :type="returnMode ? 'warning' : 'default'" 
+      <el-button
+        :type="returnMode ? 'warning' : 'default'"
         @click="toggleReturnMode"
         style="margin-left: 20px"
       >
@@ -190,7 +122,7 @@
         导出至Excel
       </el-button>
     </div>
-    
+
     <div class="table-container">
       <el-table
         :data="filteredRecords"
@@ -219,42 +151,17 @@
           width="130"
         />
         <el-table-column
-          label="设备"
-          min-width="200"
+          label="教室 / 时间段"
+          min-width="280"
         >
           <template #default="{ row }">
-            <div class="device-list">
-              <div v-if="row.camara?.name" class="device-item">
-                <el-tag size="small" type="primary">相机</el-tag>
-                <span class="device-name">{{ row.camara.name }}</span>
-              </div>
-              <div v-if="row.lens?.name" class="device-item">
-                <el-tag size="small" type="success">镜头</el-tag>
-                <span class="device-name">{{ row.lens.name }}</span>
-              </div>
-              <div v-if="row.other?.name" class="device-item">
-                <el-tag size="small" type="warning">其他</el-tag>
-                <span class="device-name">{{ row.other.name }}</span>
+            <div class="room-list">
+              <div v-for="(room, idx) in (row.rooms || [])" :key="idx" class="room-item">
+                <el-tag size="small" type="primary">教室</el-tag>
+                <span class="room-name">{{ room.name }}</span>
+                <span class="room-time">{{ room.brwtime || '' }} ~ {{ room.rtuntime || '' }}</span>
               </div>
             </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="brwtime"
-          label="预约时间"
-          width="170"
-        >
-          <template #default="{ row }">
-            {{ formatTime(row.brwtime) }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="rtuntime"
-          label="归还时间"
-          width="170"
-        >
-          <template #default="{ row }">
-            {{ formatTime(row.rtuntime) }}
           </template>
         </el-table-column>
         <el-table-column
@@ -287,11 +194,11 @@
               <el-option label="已预约" :value="0">
                 <span style="color: #e6a23c">已预约</span>
               </el-option>
-              <el-option label="已借出" :value="3">
-                <span style="color: #409eff">已借出</span>
+              <el-option label="使用中" :value="3">
+                <span style="color: #409eff">使用中</span>
               </el-option>
-              <el-option label="已归还" :value="1">
-                <span style="color: #67c23a">已归还</span>
+              <el-option label="已完成" :value="1">
+                <span style="color: #67c23a">已完成</span>
               </el-option>
               <el-option label="逾期未还" :value="2">
                 <span style="color: #f56c6c">逾期未还</span>
@@ -325,7 +232,7 @@
           </template>
         </el-table-column>
       </el-table>
-      
+
       <div class="pagination-container">
         <el-pagination
           v-model:current-page="currentPage"
@@ -342,7 +249,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Document, Search, RefreshRight, Download, Wallet } from '@element-plus/icons-vue'
 
@@ -358,18 +265,9 @@ const editForm = ref({
   name: '',
   num: '',
   tel: '',
-  camara: null,
-  lens: null,
-  other: null,
-  brwtime: '',
-  rtuntime: '',
   status: 0,
   remark: ''
 })
-
-const camaraList = ref([])
-const lensList = ref([])
-const otherDeviceList = ref([])
 
 const getToday = () => {
   const today = new Date()
@@ -396,130 +294,31 @@ const pageSize = ref(10)
 const total = ref(0)
 const rentRecords = ref([])
 
-const fetchDevices = async () => {
-  try {
-    const brwtime = editForm.value.brwtime
-    const rtuntime = editForm.value.rtuntime
-
-    const formatDateParam = (dateStr) => {
-      if (!dateStr) return ''
-      const date = new Date(dateStr)
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const day = String(date.getDate()).padStart(2, '0')
-      const hours = String(date.getHours()).padStart(2, '0')
-      const minutes = String(date.getMinutes()).padStart(2, '0')
-      return `${year}-${month}-${day} ${hours}:${minutes}`
-    }
-
-    const formattedBrwtime = formatDateParam(brwtime)
-    const formattedRtuntime = formatDateParam(rtuntime)
-
-    if (formattedBrwtime && formattedRtuntime) {
-      const url = `/api/devices/available?borrowTime=${encodeURIComponent(formattedBrwtime)}&returnTime=${encodeURIComponent(formattedRtuntime)}`
-      const response = await fetch(url)
-      const data = await response.json()
-      if (data.success) {
-        const allAvailable = data.data
-        const isCamera = (type) => type && (type.includes('相机') || type.toLowerCase().includes('camara'))
-        const isLens = (type) => type && (type.includes('镜头') || type.toLowerCase().includes('lens'))
-        camaraList.value = allAvailable.filter(d => isCamera(d.type))
-        lensList.value = allAvailable.filter(d => isLens(d.type))
-        otherDeviceList.value = allAvailable.filter(d => !isCamera(d.type) && !isLens(d.type))
-
-        if (editForm.value.camara) {
-          const camaraSelected = camaraList.value.find(d => d.id === editForm.value.camara)
-          if (!camaraSelected) {
-            const allResponse = await fetch('/api/devices')
-            const allData = await allResponse.json()
-            if (allData.success) {
-              const device = allData.data.find(d => d.id === editForm.value.camara)
-              if (device && isCamera(device.type)) {
-                camaraList.value.push(device)
-              }
-            }
-          }
-        }
-        if (editForm.value.lens) {
-          const lensSelected = lensList.value.find(d => d.id === editForm.value.lens)
-          if (!lensSelected) {
-            const allResponse = await fetch('/api/devices')
-            const allData = await allResponse.json()
-            if (allData.success) {
-              const device = allData.data.find(d => d.id === editForm.value.lens)
-              if (device && isLens(device.type)) {
-                lensList.value.push(device)
-              }
-            }
-          }
-        }
-        if (editForm.value.other) {
-          const otherSelected = otherDeviceList.value.find(d => d.id === editForm.value.other)
-          if (!otherSelected) {
-            const allResponse = await fetch('/api/devices')
-            const allData = await allResponse.json()
-            if (allData.success) {
-              const device = allData.data.find(d => d.id === editForm.value.other)
-              if (device && !isCamera(device.type) && !isLens(device.type)) {
-                otherDeviceList.value.push(device)
-              }
-            }
-          }
-        }
-      }
-    } else {
-      const response = await fetch('/api/devices')
-      const data = await response.json()
-      if (data.success) {
-        const allDevices = data.data
-        const isCamera = (type) => type && (type.includes('相机') || type.toLowerCase().includes('camara'))
-        const isLens = (type) => type && (type.includes('镜头') || type.toLowerCase().includes('lens'))
-        camaraList.value = allDevices.filter(d => isCamera(d.type))
-        lensList.value = allDevices.filter(d => isLens(d.type))
-        otherDeviceList.value = allDevices.filter(d => !isCamera(d.type) && !isLens(d.type))
-      }
-    }
-  } catch (error) {
-    console.error('获取设备列表失败:', error)
-  }
-}
-
 const filteredRecords = computed(() => {
   let result = rentRecords.value
-  
+
   if (searchText.value) {
     const text = searchText.value.toLowerCase()
-    result = result.filter(record => 
+    result = result.filter(record =>
       record.name?.toLowerCase().includes(text) ||
       record.num?.toLowerCase().includes(text) ||
       record.tel?.toLowerCase().includes(text)
     )
   }
-  
+
   if (statusFilter.value && !statusFilter.value.includes(',')) {
     result = result.filter(record => getStatusClass(record) === statusFilter.value)
   }
-  
+
   return result
 })
-
-const formatTime = (timeStr) => {
-  if (!timeStr) return ''
-  const date = new Date(timeStr)
-  const year = date.getFullYear()
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const day = date.getDate().toString().padStart(2, '0')
-  const hours = date.getHours().toString().padStart(2, '0')
-  const minutes = date.getMinutes().toString().padStart(2, '0')
-  return `${year}-${month}-${day} ${hours}:${minutes}`
-}
 
 const getStatusClass = (rental) => {
   const status = rental.status
   if (status === 0) return 'reserved'   // 已预约
-  if (status === 1) return 'returned'   // 已归还
+  if (status === 1) return 'returned'   // 已完成
   if (status === 2) return 'overdue'    // 逾期未还
-  if (status === 3) return 'borrowed'   // 已借出
+  if (status === 3) return 'borrowed'   // 使用中
   if (status === 4) return 'unpicked'   // 预约未取
   return 'reserved'
 }
@@ -527,37 +326,37 @@ const getStatusClass = (rental) => {
 const getStatusType = (rental) => {
   const status = getStatusClass(rental)
   if (status === 'reserved') return 'warning'   // 已预约 - 黄色
-  if (status === 'borrowed') return 'primary'   // 已借出 - 蓝色
+  if (status === 'borrowed') return 'primary'   // 使用中 - 蓝色
   if (status === 'overdue') return 'danger'     // 逾期未还 - 红色
   if (status === 'unpicked') return 'info'      // 预约未取 - 灰色
-  return 'success'                              // 已归还 - 绿色
+  return 'success'                              // 已完成 - 绿色
 }
 
 const getStatusText = (rental) => {
   const status = getStatusClass(rental)
   if (status === 'reserved') return '已预约'
-  if (status === 'borrowed') return '已借出'
+  if (status === 'borrowed') return '使用中'
   if (status === 'overdue') return '逾期未还'
   if (status === 'unpicked') return '预约未取'
-  return '已归还'
+  return '已完成'
 }
 
 const fetchData = async () => {
   loading.value = true
   try {
     let url = `/api/rent-records?page=${currentPage.value}&pageSize=${pageSize.value}`
-    
+
     if (dateRange.value && dateRange.value.length === 2) {
       url += `&startDate=${dateRange.value[0]}&endDate=${dateRange.value[1]}`
     }
-    
+
     if (statusFilter.value) {
       url += `&status=${encodeURIComponent(statusFilter.value)}`
     }
-    
+
     const res = await fetch(url)
     const data = await res.json()
-    
+
     if (data.success) {
       rentRecords.value = data.data.map(record => ({
         ...record,
@@ -586,9 +385,9 @@ const handleStatusChange = async (row) => {
         status: row.editingStatus
       })
     })
-    
+
     const data = await response.json()
-    
+
     if (data.success) {
       ElMessage.success(data.message || '状态更新成功')
       await fetchData()
@@ -609,26 +408,10 @@ const handleEdit = (row) => {
     name: row.name || '',
     num: row.num || '',
     tel: row.tel || '',
-    camara: row.camara?.id || null,
-    lens: row.lens?.id || null,
-    other: row.other?.id || null,
-    brwtime: row.brwtime || '',
-    rtuntime: row.rtuntime || '',
     status: row.status,
     remark: row.remark || ''
   }
   editDialogVisible.value = true
-}
-
-const formatDateTime = (dateValue) => {
-  if (!dateValue) return null
-  const date = new Date(dateValue)
-  const year = date.getFullYear()
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const day = date.getDate().toString().padStart(2, '0')
-  const hours = date.getHours().toString().padStart(2, '0')
-  const minutes = date.getMinutes().toString().padStart(2, '0')
-  return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
 const confirmEdit = async () => {
@@ -642,18 +425,13 @@ const confirmEdit = async () => {
         name: editForm.value.name,
         num: editForm.value.num,
         tel: editForm.value.tel,
-        camara: editForm.value.camara,
-        lens: editForm.value.lens,
-        other: editForm.value.other,
-        brwtime: formatDateTime(editForm.value.brwtime),
-        rtuntime: formatDateTime(editForm.value.rtuntime),
         status: editForm.value.status,
         remark: editForm.value.remark
       })
     })
-    
+
     const data = await response.json()
-    
+
     if (data.success) {
       ElMessage.success(data.message || '订单更新成功')
       editDialogVisible.value = false
@@ -713,14 +491,14 @@ const handleReset = () => {
   const today = new Date()
   const nextMonth = new Date(today)
   nextMonth.setMonth(nextMonth.getMonth() + 1)
-  
+
   const formatDate = (date) => {
     const year = date.getFullYear()
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
     const day = date.getDate().toString().padStart(2, '0')
     return `${year}-${month}-${day}`
   }
-  
+
   searchText.value = ''
   statusFilter.value = ''
   returnMode.value = false
@@ -732,7 +510,7 @@ const handleReset = () => {
 
 const toggleReturnMode = () => {
   returnMode.value = !returnMode.value
-  
+
   if (returnMode.value) {
     statusFilter.value = 'borrowed,overdue'
     dateRange.value = null
@@ -749,7 +527,7 @@ const toggleReturnMode = () => {
     }
     dateRange.value = [formatDate(today), formatDate(nextMonth)]
   }
-  
+
   currentPage.value = 1
   fetchData()
 }
@@ -762,27 +540,27 @@ const handleExport = () => {
 const confirmExport = async () => {
   let url = '/api/rent-records/export'
   const params = []
-  
+
   if (exportDateRange.value && exportDateRange.value.length === 2) {
     params.push(`startDate=${exportDateRange.value[0]}`)
     params.push(`endDate=${exportDateRange.value[1]}`)
   }
-  
+
   if (params.length > 0) {
     url += '?' + params.join('&')
   }
-  
+
   try {
     const response = await fetch(url)
     if (!response.ok) {
       throw new Error('导出失败')
     }
-    
+
     const blob = await response.blob()
     const downloadUrl = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = downloadUrl
-    
+
     const contentDisposition = response.headers.get('Content-Disposition')
     let fileName = '预约记录.xlsx'
     if (contentDisposition) {
@@ -796,13 +574,13 @@ const confirmExport = async () => {
         }
       }
     }
-    
+
     link.download = fileName
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
     window.URL.revokeObjectURL(downloadUrl)
-    
+
     exportDialogVisible.value = false
     ElMessage.success('导出成功')
   } catch (error) {
@@ -813,13 +591,6 @@ const confirmExport = async () => {
 
 onMounted(() => {
   fetchData()
-  fetchDevices()
-})
-
-watch([() => editForm.value.brwtime, () => editForm.value.rtuntime], () => {
-  if (editDialogVisible.value) {
-    fetchDevices()
-  }
 })
 </script>
 
@@ -866,44 +637,49 @@ watch([() => editForm.value.brwtime, () => editForm.value.rtuntime], () => {
   justify-content: flex-end;
 }
 
-.device-list {
+.room-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.device-item {
+.room-item {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.device-name {
+.room-name {
   font-size: 13px;
   color: #606266;
+}
+.room-time {
+  font-size: 12px;
+  color: #909399;
+  margin-left: 4px;
 }
 
 @media screen and (max-width: 768px) {
   .rent-details-page {
     padding: 20px 15px;
   }
-  
+
   .page-header {
     font-size: 18px;
     margin-bottom: 20px;
     padding-bottom: 15px;
   }
-  
+
   .header-icon {
     font-size: 22px;
   }
-  
+
   .search-bar {
     flex-direction: column;
     gap: 10px;
     align-items: stretch;
   }
-  
+
   .search-bar .el-input,
   .search-bar .el-select {
     width: 100% !important;
